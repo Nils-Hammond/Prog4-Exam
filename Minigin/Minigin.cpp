@@ -9,6 +9,9 @@
 #include "SceneManager.h"
 #include "Renderer.h"
 #include "ResourceManager.h"
+#include "Time.h"
+#include <chrono>
+#include <thread>
 
 SDL_Window* g_window{};
 
@@ -65,6 +68,8 @@ dae::Minigin::Minigin(const std::string &dataPath)
 	Renderer::GetInstance().Init(g_window);
 
 	ResourceManager::GetInstance().Init(dataPath);
+
+	Time::GetInstance().Start();
 }
 
 dae::Minigin::~Minigin()
@@ -82,13 +87,26 @@ void dae::Minigin::Run(const std::function<void()>& load)
 	auto& renderer = Renderer::GetInstance();
 	auto& sceneManager = SceneManager::GetInstance();
 	auto& input = InputManager::GetInstance();
+	auto& time = Time::GetInstance();
 
-	// todo: this update loop could use some work.
 	bool doContinue = true;
+	float lag = 0.0f;
+
 	while (doContinue)
 	{
+		time.Update();
+		lag += time.GetDeltaTime();
+
 		doContinue = input.ProcessInput();
+		while (lag >= time.GetFixedTimeStep())
+		{
+			sceneManager.FixedUpdate();
+			lag -= time.GetFixedTimeStep();
+		}
 		sceneManager.Update();
 		renderer.Render();
+
+		// Cap FPS
+		//std::this_thread::sleep_for(time.GetSleepTime());
 	}
 }
