@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include "BaseComponent.h"
+#include "Transform.h"
 #include <vector>
 #include <typeinfo>
 #include <iostream>
@@ -15,6 +16,14 @@ namespace dae
 		void FixedUpdate();
 		void Render() const;
 		void CleanupComponents();
+
+		void SetParent(GameObject* parent);
+		GameObject* GetParent() const { return m_parent; }
+		bool IsChild(GameObject* object) const;
+		Transform* GetTransform() const;
+		std::vector<GameObject*> GetChildren() { return m_pChildren; }
+
+		// Component management
 		template <typename T>
 		void AddComponent(std::unique_ptr<T> component)
 		{
@@ -63,8 +72,21 @@ namespace dae
 			}
 			return false;
 		}
-		
-		GameObject() = default;
+
+		// Transform specialization
+		template<>
+		Transform* GetComponent()
+		{
+			return m_transform.get();
+		}
+		template<>
+		void AddComponent(std::unique_ptr<Transform>)
+		{
+			assert(false && "Should not be able to add Transform");
+		}
+
+		// Constructor & Destructor
+		GameObject();
 		~GameObject();
 		GameObject(const GameObject& other) = delete;
 		GameObject(GameObject&& other) = delete;
@@ -72,6 +94,13 @@ namespace dae
 		GameObject& operator=(GameObject&& other) = delete;
 
 	private:
+		void RemoveChild(GameObject* object);
+		void AddChild(GameObject* object);
+
+		std::unique_ptr<Transform> m_transform;
+
 		std::vector<std::unique_ptr<BaseComponent>> _uptrComponents{};
+		std::vector<GameObject*> m_pChildren{};
+		GameObject* m_parent{};
 	};
 }

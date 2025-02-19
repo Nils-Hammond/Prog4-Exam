@@ -15,7 +15,7 @@ namespace dae
 
 		void SetText(const std::string& text);
 
-		TextRenderComponent(std::weak_ptr<GameObject> parentObject, const std::string& text, std::shared_ptr<Font> font);
+		TextRenderComponent(GameObject* owner, const std::string& text, std::shared_ptr<Font> font);
 		virtual ~TextRenderComponent() = default;
 		TextRenderComponent(const TextRenderComponent& other) = delete;
 		TextRenderComponent(TextRenderComponent&& other) = delete;

@@ -107,6 +107,6 @@ void dae::Minigin::Run(const std::function<void()>& load)
 		renderer.Render();
 
 		// Cap FPS
-		//std::this_thread::sleep_for(time.GetSleepTime());
+		std::this_thread::sleep_for(time.GetSleepTime());
 	}
 }

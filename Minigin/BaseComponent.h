@@ -10,10 +10,11 @@ namespace dae
 	public:
 		virtual void Update() = 0;
 		virtual void FixedUpdate() {};
-		virtual void Destroy() { _toBeDestroyed = true; };
-		virtual bool ToBeDestroyed() const { return _toBeDestroyed; };
+		virtual void Render() const {};
+		virtual void Destroy() { m_toBeDestroyed = true; };
+		virtual bool IsToBeDestroyed() const { return m_toBeDestroyed; };
+		GameObject* GetOwner() const { return m_pOwner; };
 
-		BaseComponent(std::weak_ptr<GameObject> parentObject);
 		virtual ~BaseComponent() = default;
 		BaseComponent(const BaseComponent& other) = delete;
 		BaseComponent(BaseComponent&& other) = delete;
@@ -21,7 +22,9 @@ namespace dae
 		BaseComponent& operator=(BaseComponent&& other) = delete;
 
 	protected:
-		std::weak_ptr<GameObject> _parentObjectPtr{};
-		bool _toBeDestroyed{ false };
+		explicit BaseComponent(GameObject* owner): m_pOwner(owner) {}
+	private:
+		GameObject* m_pOwner{};
+		bool m_toBeDestroyed{ false };
 	};
 }

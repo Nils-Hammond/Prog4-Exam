@@ -14,8 +14,8 @@ namespace dae
 
 		void SetTexture(const std::string& text);
 
-		RenderComponent(std::weak_ptr<GameObject> parentObject);
-		RenderComponent(std::weak_ptr<GameObject> parentObject, const std::string& filename);
+		RenderComponent(GameObject* owner);
+		RenderComponent(GameObject* owner, const std::string& filename);
 		virtual ~RenderComponent() = default;
 		RenderComponent(const RenderComponent& other) = delete;
 		RenderComponent(RenderComponent&& other) = delete;

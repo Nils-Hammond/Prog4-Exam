@@ -8,8 +8,8 @@
 #include "Texture2D.h"
 #include "Transform.h"
 
-dae::TextRenderComponent::TextRenderComponent(std::weak_ptr<GameObject> parentObject, const std::string& text, std::shared_ptr<Font> font)
-	: m_text(text), m_font(std::move(font)), m_needsUpdate{true}, RenderComponent(parentObject)
+dae::TextRenderComponent::TextRenderComponent(GameObject* owner, const std::string& text, std::shared_ptr<Font> font)
+	: m_text(text), m_font(std::move(font)), m_needsUpdate{true}, RenderComponent(owner)
 { }
 
 void dae::TextRenderComponent::Update()
@@ -38,9 +38,9 @@ void dae::TextRenderComponent::Render() const
 {
 	if (m_texture != nullptr)
 	{
-		//if (auto parent = _parentObjectPtr.lock())
+		//if (auto parent = m_pOwner.lock())
 		//{
-			const Transform* transform = _parentObjectPtr->GetComponent<Transform>();
+			const Transform* transform = m_pOwner->GetComponent<Transform>();
 			if (transform != nullptr)
 			{
 				const auto& pos = transform->GetPosition();

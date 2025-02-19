@@ -5,27 +5,27 @@
 #include <iostream>
 #include <format>
 
-dae::FPSComponent::FPSComponent(std::weak_ptr<GameObject> parentObject)
-	: BaseComponent(parentObject), m_frames(0), m_timeSinceLastFixedUpdate(0)
+dae::FPSComponent::FPSComponent(GameObject* owner)
+	: BaseComponent(owner), m_textUpdateTimer(0)
 {
+	m_pTextRenderComponent = GetOwner()->GetComponent<TextRenderComponent>();
+	assert(m_pTextRenderComponent != nullptr && "FPSComponent constructed before TextRenderComponent");
 }
 
 void dae::FPSComponent::FixedUpdate()
 {
-	float fps = m_frames / m_timeSinceLastFixedUpdate;
-	if (m_timeSinceLastFixedUpdate == 0)
-		fps = 0;
-	m_timeSinceLastFixedUpdate = 0;
-	m_frames = 0;
-	std::string fpsText = std::format("{:.1f} FPS", fps);
-	if (auto parent = _parentObjectPtr.lock())
-	{
-		parent->GetComponent<TextRenderComponent>()->SetText(fpsText);
-	}
 }
 
 void dae::FPSComponent::Update()
 {
-	++m_frames;
-	m_timeSinceLastFixedUpdate += Time::GetInstance().GetDeltaTime();
+	m_textUpdateTimer += Time::GetInstance().GetDeltaTime();
+
+	if (m_textUpdateTimer >= TEXT_UPDATE_DELAY)
+	{
+		float fps = 1 / Time::GetInstance().GetDeltaTime();
+
+		std::string fpsText = std::format("{:.1f} FPS", fps);
+		m_pTextRenderComponent->SetText(fpsText);
+		m_textUpdateTimer -= TEXT_UPDATE_DELAY;
+	}
 }
