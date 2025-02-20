@@ -9,6 +9,19 @@ unsigned int Scene::m_idCounter = 0;
 
 Scene::Scene(const std::string& name) : m_name(name) {}
 
+void dae::Scene::CleanupObjects()
+{
+	for (int idx{}; idx < m_objects.size(); ++idx)
+	{
+		if (m_objects[idx]->IsToBeDestroyed())
+		{
+			Remove(m_objects[idx]);
+			--idx;
+			std::cout << "Object removed" << std::endl;
+		}
+	}
+}
+
 Scene::~Scene() = default;
 
 void Scene::Add(std::shared_ptr<GameObject> object)
@@ -32,6 +45,7 @@ void Scene::Update()
 	{
 		object->Update();
 	}
+	CleanupObjects();
 }
 
 void dae::Scene::FixedUpdate()

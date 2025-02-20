@@ -22,12 +22,16 @@ namespace dae
 		bool IsChild(GameObject* object) const;
 		Transform* GetTransform() const;
 		std::vector<GameObject*> GetChildren() { return m_pChildren; }
+		void Destroy();
+		bool IsToBeDestroyed() const { return m_toBeDestroyed; }
 
 		// Component management
 		template <typename T>
 		void AddComponent(std::unique_ptr<T> component)
 		{
-			for (int idx{}; idx < _uptrComponents.size(); ++idx)
+			if (component.get()->GetOwner() != this)
+				return;
+			for (unsigned int idx{}; idx < _uptrComponents.size(); ++idx)
 			{
 				if (typeid(T) == typeid(*_uptrComponents[idx].get()))
 				{
@@ -39,7 +43,7 @@ namespace dae
 		template <typename T>
 		void RemoveComponent()
 		{
-			for (int idx{}; idx < _uptrComponents.size(); ++idx)
+			for (unsigned int idx{}; idx < _uptrComponents.size(); ++idx)
 			{
 				if (typeid(T) == typeid(*_uptrComponents[idx].get()))
 				{
@@ -51,7 +55,7 @@ namespace dae
 		template <typename T>
 		T* GetComponent()
 		{
-			for (int idx{}; idx < _uptrComponents.size(); ++idx)
+			for (unsigned int idx{}; idx < _uptrComponents.size(); ++idx)
 			{
 				if (T* castedComponent = dynamic_cast<T*>(_uptrComponents[idx].get()))
 				{
@@ -63,7 +67,7 @@ namespace dae
 		template <typename T>
 		bool HasComponent()
 		{
-			for (int idx{}; idx < _uptrComponents.size(); ++idx)
+			for (unsigned int idx{}; idx < _uptrComponents.size(); ++idx)
 			{
 				if (typeid(T) == typeid(*_uptrComponents[idx].get()))
 				{
@@ -102,5 +106,6 @@ namespace dae
 		std::vector<std::unique_ptr<BaseComponent>> _uptrComponents{};
 		std::vector<GameObject*> m_pChildren{};
 		GameObject* m_parent{};
+		bool m_toBeDestroyed{ false };
 	};
 }

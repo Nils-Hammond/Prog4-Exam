@@ -57,7 +57,7 @@ void dae::GameObject::Render() const
 
 void dae::GameObject::CleanupComponents()
 {
-	for (int idx{}; idx < _uptrComponents.size(); ++idx)
+	for (unsigned int idx{}; idx < _uptrComponents.size(); ++idx)
 	{
 		if (_uptrComponents[idx]->IsToBeDestroyed())
 		{
@@ -69,14 +69,28 @@ void dae::GameObject::CleanupComponents()
 
 bool dae::GameObject::IsChild(GameObject* object) const
 {
-	if (object->GetParent() != nullptr)
-		return true;
+	for (auto& child : m_pChildren)
+	{
+		if (child == object)
+			return true;
+	}
 	return false;
 }
 
 dae::Transform* dae::GameObject::GetTransform() const
 {
 	return m_transform.get();
+}
+
+void dae::GameObject::Destroy()
+{
+	m_toBeDestroyed = true;
+	for (auto& child : m_pChildren)
+	{
+		child->Destroy();
+	}
+	if (m_parent)
+		SetParent(nullptr);
 }
 
 void dae::GameObject::SetParent(GameObject* parent)
