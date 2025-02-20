@@ -11,7 +11,7 @@ Scene::Scene(const std::string& name) : m_name(name) {}
 
 void dae::Scene::CleanupObjects()
 {
-	for (int idx{}; idx < m_objects.size(); ++idx)
+	for (unsigned int idx{}; idx < m_objects.size(); ++idx)
 	{
 		if (m_objects[idx]->IsToBeDestroyed())
 		{
