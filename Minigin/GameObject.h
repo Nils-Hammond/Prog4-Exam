@@ -17,7 +17,7 @@ namespace dae
 		void Render() const;
 		void CleanupComponents();
 
-		void SetParent(GameObject* parent);
+		void SetParent(GameObject* parent, bool keepWorldPosition = true);
 		GameObject* GetParent() const { return m_parent; }
 		bool IsChild(GameObject* object) const;
 		Transform* GetTransform() const;
@@ -26,6 +26,7 @@ namespace dae
 		bool IsToBeDestroyed() const { return m_toBeDestroyed; }
 
 		// Component management
+		// Q: Is using a concept to make sure types are derived from BaseComponent something I can do here?
 		template <typename T>
 		void AddComponent(std::unique_ptr<T> component)
 		{

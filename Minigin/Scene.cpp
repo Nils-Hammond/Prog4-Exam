@@ -17,7 +17,6 @@ void dae::Scene::CleanupObjects()
 		{
 			Remove(m_objects[idx]);
 			--idx;
-			std::cout << "Object removed" << std::endl;
 		}
 	}
 }

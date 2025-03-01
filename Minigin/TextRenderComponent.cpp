@@ -33,24 +33,6 @@ void dae::TextRenderComponent::Update()
 	}
 }
 
-/*
-void dae::TextRenderComponent::Render() const
-{
-	if (m_texture != nullptr)
-	{
-		//if (auto parent = m_pOwner.lock())
-		//{
-			const Transform* transform = m_pOwner->GetComponent<Transform>();
-			if (transform != nullptr)
-			{
-				const auto& pos = transform->GetPosition();
-				Renderer::GetInstance().RenderTexture(*m_texture, pos.x, pos.y);
-			}
-		//}
-	}
-}
-*/
-
 // This implementation uses the "dirty flag" pattern
 void dae::TextRenderComponent::SetText(const std::string& text)
 {

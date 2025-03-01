@@ -8,7 +8,6 @@ namespace dae
 	{
 	public:
 		void Update() override;
-		void FixedUpdate() override;
 
 		FPSComponent(GameObject* owner);
 		virtual ~FPSComponent() = default;

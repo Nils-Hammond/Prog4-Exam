@@ -1,6 +1,7 @@
 #include "SelfDestruct.h"
 #include "GameObject.h"
 #include "Time.h"
+#include "TextRenderComponent.h"
 
 dae::SelfDestruct::SelfDestruct(GameObject* owner, float timeToLive)
 	: BaseComponent(owner)

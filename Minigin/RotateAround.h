@@ -18,6 +18,5 @@ namespace dae
 		float m_Speed;
 		float m_Radius;
 		float m_Angle;
-		glm::vec3 m_Center;
 	};
 }
