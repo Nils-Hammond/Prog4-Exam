@@ -70,6 +70,8 @@ dae::Minigin::Minigin(const std::string &dataPath)
 	ResourceManager::GetInstance().Init(dataPath);
 
 	Time::GetInstance().Start();
+
+	InputManager::GetInstance().Init();
 }
 
 dae::Minigin::~Minigin()

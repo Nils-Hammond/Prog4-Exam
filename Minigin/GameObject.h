@@ -26,7 +26,6 @@ namespace dae
 		bool IsToBeDestroyed() const { return m_toBeDestroyed; }
 
 		// Component management
-		// Q: Is using a concept to make sure types are derived from BaseComponent something I can do here?
 		template <typename T>
 		void AddComponent(std::unique_ptr<T> component)
 		{
@@ -39,7 +38,7 @@ namespace dae
 					return;
 				}
 			}
-			_uptrComponents.push_back(std::move(component));
+			_uptrComponents.emplace_back(std::move(component));
 		}
 		template <typename T>
 		void RemoveComponent()
