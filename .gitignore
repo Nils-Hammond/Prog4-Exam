@@ -405,3 +405,6 @@ build_web
 
 # Dear Imgui settings file
 imgui.ini
+/3rdParty/imgui-1.91.8/backends
+/3rdParty/imgui-1.91.8/docs
+/3rdParty/imgui-1.91.8/misc
