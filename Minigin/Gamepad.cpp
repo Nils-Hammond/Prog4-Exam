@@ -15,7 +15,7 @@ public:
 	bool IsButtonUpThisFrame(Button button);
 private:
 	WORD GetButtonFlag(Button button) const;
-
+	
 	int m_controllerIndex;
 	XINPUT_STATE m_previousState;
 	XINPUT_STATE m_currentState;

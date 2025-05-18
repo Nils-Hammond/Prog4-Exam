@@ -27,7 +27,7 @@ namespace dae
 		std::map<std::pair<Gamepad::Button, ButtonState>, std::unique_ptr<Command>> m_gamepadCommands;
 		std::unique_ptr<Gamepad> m_gamepad;
 
-		const Uint8* m_keyState;
+		const Uint8* m_keyState{};
 	};
 
 }

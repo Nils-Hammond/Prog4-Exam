@@ -9,13 +9,13 @@
 #include "SceneManager.h"
 #include "Renderer.h"
 #include "ResourceManager.h"
-#include "Time.h"
+#include "DaeTime.h"
 #include <chrono>
 #include <thread>
 
 SDL_Window* g_window{};
 
-void PrintSDLVersion()
+void static PrintSDLVersion()
 {
 	SDL_version version{};
 	SDL_VERSION(&version);

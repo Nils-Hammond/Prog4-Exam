@@ -1,6 +1,5 @@
 #include <SDL.h>
 #include "InputManager.h"
-#include "imgui_impl_sdl2.h"
 #include <iostream>
 
 dae::InputManager::~InputManager() = default;
@@ -37,8 +36,6 @@ bool dae::InputManager::ProcessInput()
 		if (e.type == SDL_MOUSEBUTTONDOWN) {
 
 		}
-		// process event for IMGUI
-		ImGui_ImplSDL2_ProcessEvent(&e);
 	}
 
 	for (const auto& [keyPair, command] : m_keyboardCommands)
@@ -52,7 +49,9 @@ bool dae::InputManager::ProcessInput()
 	for (const auto& [keyPair, command] : m_gamepadCommands)
 	{
 		if (m_gamepad->IsButtonDownThisFrame(keyPair.first) && keyPair.second == ButtonState::Down)
+		{
 			command.get()->Execute();
+		}
 	}
 	for (const auto& [keyPair, command] : m_gamepadCommands)
 	{

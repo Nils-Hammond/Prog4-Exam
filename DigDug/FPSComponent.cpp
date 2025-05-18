@@ -1,18 +1,17 @@
 #include "FPSComponent.h"
-#include "TextRenderComponent.h"
 #include "GameObject.h"
-#include "Time.h"
+#include "TextRenderComponent.h"
+#include "DaeTime.h"
 #include <iostream>
 #include <format>
 
-dae::FPSComponent::FPSComponent(GameObject* owner)
-	: BaseComponent(owner), m_textUpdateTimer(0)
+FPSComponent::FPSComponent(dae::GameObject* owner) : dae::BaseComponent(owner), m_textUpdateTimer(0)
 {
-	m_pTextRenderComponent = GetOwner()->GetComponent<TextRenderComponent>();
+	m_pTextRenderComponent = GetOwner()->GetComponent<dae::TextRenderComponent>();
 	assert(m_pTextRenderComponent != nullptr && "FPSComponent constructed before TextRenderComponent");
 }
 
-void dae::FPSComponent::Update()
+void FPSComponent::Update()
 {
 	// I don't think this check works if something destroys the TextRenderComponent after the FPSComponent has updated and am not sure how to fix that
 	if (m_pTextRenderComponent == nullptr)
@@ -23,11 +22,11 @@ void dae::FPSComponent::Update()
 		return;
 	}
 
-	m_textUpdateTimer += Time::GetInstance().GetDeltaTime();
+	m_textUpdateTimer += dae::Time::GetInstance().GetDeltaTime();
 
 	if (m_textUpdateTimer >= TEXT_UPDATE_DELAY)
 	{
-		float fps = 1 / Time::GetInstance().GetDeltaTime();
+		float fps = 1 / dae::Time::GetInstance().GetDeltaTime();
 
 		std::string fpsText = std::format("{:.1f} FPS", fps);
 		m_pTextRenderComponent->SetText(fpsText);

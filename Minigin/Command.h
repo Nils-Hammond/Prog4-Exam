@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include "glm.hpp"
+#include "SubjectObserver.h"
 namespace dae
 {
 	class GameObject;
@@ -34,6 +35,21 @@ namespace dae
 		glm::vec3 m_direction;
 	public:
 		MoveCommand(GameObject* actor, glm::vec3 direction);
+		void Execute() override;
+	};
+
+	class DieCommand : public GameActorCommand
+	{	
+	public:
+		DieCommand(GameObject* actor);
+		void Execute() override;
+	};
+	
+	class TriggerEventCommand : public Command, public Subject
+	{
+		Event m_event;
+	public:
+		TriggerEventCommand(Event m_event);
 		void Execute() override;
 	};
 }

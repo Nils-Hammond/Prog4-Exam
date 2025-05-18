@@ -8,7 +8,6 @@
 
 namespace dae
 {
-	// todo: this should become final.
 	class GameObject final
 	{
 	public:
