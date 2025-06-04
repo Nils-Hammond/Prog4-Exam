@@ -78,6 +78,14 @@
     <Import Project="..\vld.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
@@ -156,6 +164,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="FPSComponent.cpp" />
+    <ClCompile Include="GameCommands.cpp" />
     <ClCompile Include="LivesAndPoints.cpp" />
     <ClCompile Include="Load.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -165,6 +174,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FPSComponent.h" />
+    <ClInclude Include="GameCommands.h" />
     <ClInclude Include="LivesAndPoints.h" />
     <ClInclude Include="MoveComponent.h" />
     <ClInclude Include="RotateAround.h" />

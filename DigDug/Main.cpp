@@ -18,6 +18,7 @@
 #include "RotateAround.h"
 #include "SelfDestruct.h"
 #include "Command.h"
+#include "GameCommands.h"
 #include "InputManager.h"
 #include "Gamepad.h"
 #include "MoveComponent.h"
@@ -127,11 +128,11 @@ void LoadPlayer1(dae::Scene& scene)
 	inputManager.BindKeyboardCommand(SDLK_z, dae::InputManager::ButtonState::Down, std::move(pookaCommand));
 	inputManager.BindKeyboardCommand(SDLK_x, dae::InputManager::ButtonState::Down, std::move(fygarCommand));
 
-	inputManager.BindKeyboardCommand(SDLK_s, dae::InputManager::ButtonState::Pressed, std::make_unique<dae::MoveCommand>(player1.get(), glm::vec3(0.f, 1.f, 0.f)));
-	inputManager.BindKeyboardCommand(SDLK_w, dae::InputManager::ButtonState::Pressed, std::make_unique<dae::MoveCommand>(player1.get(), glm::vec3(0.f, -1.f, 0.f)));
-	inputManager.BindKeyboardCommand(SDLK_a, dae::InputManager::ButtonState::Pressed, std::make_unique<dae::MoveCommand>(player1.get(), glm::vec3(-1.f, 0.f, 0.f)));
-	inputManager.BindKeyboardCommand(SDLK_d, dae::InputManager::ButtonState::Pressed, std::make_unique<dae::MoveCommand>(player1.get(), glm::vec3(1.f, 0.f, 0.f)));
-	inputManager.BindKeyboardCommand(SDLK_c, dae::InputManager::ButtonState::Down, std::make_unique<dae::DieCommand>(player1.get()));
+	inputManager.BindKeyboardCommand(SDLK_s, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player1.get(), glm::vec3(0.f, 1.f, 0.f), 50.f));
+	inputManager.BindKeyboardCommand(SDLK_w, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player1.get(), glm::vec3(0.f, -1.f, 0.f), 50.f));
+	inputManager.BindKeyboardCommand(SDLK_a, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player1.get(), glm::vec3(-1.f, 0.f, 0.f), 50.f));
+	inputManager.BindKeyboardCommand(SDLK_d, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player1.get(), glm::vec3(1.f, 0.f, 0.f), 50.f));
+	inputManager.BindKeyboardCommand(SDLK_c, dae::InputManager::ButtonState::Down, std::make_unique<DieCommand>(player1.get()));
 
 }
 
@@ -177,11 +178,16 @@ void LoadPlayer2(dae::Scene& scene)
 	inputManager.BindGamepadCommand(dae::Gamepad::Button::A, dae::InputManager::ButtonState::Down, std::move(pookaCommand));
 	inputManager.BindGamepadCommand(dae::Gamepad::Button::B, dae::InputManager::ButtonState::Down, std::move(fygarCommand));
 
-	inputManager.BindGamepadCommand(dae::Gamepad::Button::DPadDown, dae::InputManager::ButtonState::Pressed, std::make_unique<dae::MoveCommand>(player2.get(), glm::vec3(0.f, 1.f, 0.f)));
-	inputManager.BindGamepadCommand(dae::Gamepad::Button::DPadUp, dae::InputManager::ButtonState::Pressed, std::make_unique<dae::MoveCommand>(player2.get(), glm::vec3(0.f, -1.f, 0.f)));
-	inputManager.BindGamepadCommand(dae::Gamepad::Button::DPadLeft, dae::InputManager::ButtonState::Pressed, std::make_unique<dae::MoveCommand>(player2.get(), glm::vec3(-1.f, 0.f, 0.f)));
-	inputManager.BindGamepadCommand(dae::Gamepad::Button::DPadRight, dae::InputManager::ButtonState::Pressed, std::make_unique<dae::MoveCommand>(player2.get(), glm::vec3(1.f, 0.f, 0.f)));
-	inputManager.BindGamepadCommand(dae::Gamepad::Button::X, dae::InputManager::ButtonState::Down, std::make_unique<dae::DieCommand>(player2.get()));
+	inputManager.BindKeyboardCommand(SDLK_UP, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player2.get(), glm::vec3(0.f, -1.f, 0.f)));
+	inputManager.BindKeyboardCommand(SDLK_DOWN, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player2.get(), glm::vec3(0.f, 1.f, 0.f)));
+	inputManager.BindKeyboardCommand(SDLK_LEFT, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player2.get(), glm::vec3(-1.f, 0.f, 0.f)));
+	inputManager.BindKeyboardCommand(SDLK_RIGHT, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player2.get(), glm::vec3(1.f, 0.f, 0.f)));
+
+	inputManager.BindGamepadCommand(dae::Gamepad::Button::DPadDown, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player2.get(), glm::vec3(0.f, 1.f, 0.f)));
+	inputManager.BindGamepadCommand(dae::Gamepad::Button::DPadUp, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player2.get(), glm::vec3(0.f, -1.f, 0.f)));
+	inputManager.BindGamepadCommand(dae::Gamepad::Button::DPadLeft, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player2.get(), glm::vec3(-1.f, 0.f, 0.f)));
+	inputManager.BindGamepadCommand(dae::Gamepad::Button::DPadRight, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player2.get(), glm::vec3(1.f, 0.f, 0.f)));
+	inputManager.BindGamepadCommand(dae::Gamepad::Button::X, dae::InputManager::ButtonState::Down, std::make_unique<DieCommand>(player2.get()));
 }
 
 
