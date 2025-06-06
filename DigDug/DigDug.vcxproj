@@ -165,18 +165,26 @@
   <ItemGroup>
     <ClCompile Include="FPSComponent.cpp" />
     <ClCompile Include="GameCommands.cpp" />
+    <ClCompile Include="LevelLoader.cpp" />
     <ClCompile Include="LivesAndPoints.cpp" />
     <ClCompile Include="Load.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="MoveCharacterCommand.cpp" />
     <ClCompile Include="MoveComponent.cpp" />
+    <ClCompile Include="PlayerComponent.cpp" />
+    <ClCompile Include="PlayerState.cpp" />
     <ClCompile Include="RotateAround.cpp" />
     <ClCompile Include="SelfDestruct.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FPSComponent.h" />
     <ClInclude Include="GameCommands.h" />
+    <ClInclude Include="LevelLoader.h" />
     <ClInclude Include="LivesAndPoints.h" />
+    <ClInclude Include="MoveCharacterCommand.h" />
     <ClInclude Include="MoveComponent.h" />
+    <ClInclude Include="PlayerComponent.h" />
+    <ClInclude Include="PlayerState.h" />
     <ClInclude Include="RotateAround.h" />
     <ClInclude Include="SelfDestruct.h" />
   </ItemGroup>

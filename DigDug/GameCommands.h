@@ -20,15 +20,6 @@ public:
 	void Execute() override;
 };
 
-class MoveCharacterCommand : public GameActorCommand
-{
-	glm::vec3 m_direction;
-	float m_speed;
-public:
-	MoveCharacterCommand(dae::GameObject* actor, glm::vec3 direction, float speed = 100.f);
-	void Execute() override;
-};
-
 class DieCommand : public GameActorCommand
 {
 public:

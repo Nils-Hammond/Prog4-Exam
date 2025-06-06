@@ -23,12 +23,14 @@
 #include "Gamepad.h"
 #include "MoveComponent.h"
 #include "LivesAndPoints.h"
+#include "LevelLoader.h"
+#include "MoveCharacterCommand.h"
 
 void LoadPlayer1(dae::Scene& scene);
 void LoadPlayer2(dae::Scene& scene);
 
 template <typename T>
-void CheckComponent(const std::string& templateName, dae::GameObject* object)
+void CheckComponent(const std::string& templateName, const dae::GameObject& object)
 {
 	if (object->HasComponent<T>())
 	{
@@ -40,59 +42,62 @@ void CheckComponent(const std::string& templateName, dae::GameObject* object)
 	}
 }
 
-// I should really split up this function into smaller functions
+void LoadLevel(const std::string& levelFile, dae::Scene& scene)
+{
+	auto levelLoader = std::make_shared<dae::GameObject>();
+	levelLoader->AddComponent(std::make_unique<LevelLoader>(levelLoader.get(), &scene));
+	scene.Add(levelLoader);
+	levelLoader->GetComponent<LevelLoader>()->LoadLevel(levelFile);
+}
+
 void static load()
 {
 	auto& scene = dae::SceneManager::GetInstance().CreateScene("Demo");
 
-	//Background Image
-	auto go = std::make_shared<dae::GameObject>();
-	go->AddComponent(std::make_unique<dae::RenderComponent>(go.get(), "background.tga"));
-	scene.Add(go);
+	LoadPlayer1(scene);
+	LoadPlayer2(scene);
 
-	//Logo
-	go = std::make_shared<dae::GameObject>();
-	go->AddComponent(std::make_unique<dae::RenderComponent>(go.get(), "logo.tga"));
-	go->GetTransform()->SetLocalPosition(280.f, 140.f);
-	scene.Add(go);
+	LoadLevel("../Data/Levels/Level1.txt", scene);
 
 	//Title Text
-	auto font = dae::ResourceManager::GetInstance().LoadFont("Lingua.otf", 28);
-	go = std::make_shared<dae::GameObject>();
+	auto font = dae::ResourceManager::GetInstance().LoadFont("../Data/Fonts/Arcade.ttf", 14);
+	auto go = std::make_shared<dae::GameObject>();
 	go->AddComponent(std::make_unique<dae::TextRenderComponent>(go.get(), "Programming 4 Assignment", font));
+	go->SetRenderLayer(1);
 	go->GetTransform()->SetLocalPosition(200.f, 20.f);
 	scene.Add(go);
 
 	//FPS Counter
 	go = std::make_shared<dae::GameObject>();
 	go->AddComponent(std::make_unique<dae::TextRenderComponent>(go.get(), "0.0 FPS", font));
+	go->SetRenderLayer(1);
 	go->AddComponent(std::make_unique<FPSComponent>(go.get()));
 	go->GetTransform()->SetLocalPosition(20.f, 20.f);
 	scene.Add(go);
 
 	//Controls Text
-	font = dae::ResourceManager::GetInstance().LoadFont("Lingua.otf", 16);
+	font = dae::ResourceManager::GetInstance().LoadFont("../Data/Fonts/Arcade.ttf", 8);
 	go = std::make_shared<dae::GameObject>();
 	go->GetTransform()->SetLocalPosition(20.f, 80.f, 0.f);
 	go->AddComponent(std::make_unique<dae::TextRenderComponent>(go.get(), "Use the D-Pad to move Pooka, X to inflict damage, A and B to kill enemies", font));
+	go->SetRenderLayer(1);
 	scene.Add(go);
 
 	go = std::make_shared<dae::GameObject>();
 	go->GetTransform()->SetLocalPosition(20.f, 100.f, 0.f);
 	go->AddComponent(std::make_unique<dae::TextRenderComponent>(go.get(), "Use WASD to move DigDug, C to inflict damage, Z and X to kill enemies", font));
+	go->SetRenderLayer(1);
 	scene.Add(go);
-
-	LoadPlayer1(scene);
-	LoadPlayer2(scene);
 }
 
 void LoadPlayer1(dae::Scene& scene)
 {
-	auto font = dae::ResourceManager::GetInstance().LoadFont("Lingua.otf", 16);
+	auto font = dae::ResourceManager::GetInstance().LoadFont("../Data/Fonts/Arcade.ttf", 8);
 
 	//P1 Lives Display
 	auto go = std::make_shared<dae::GameObject>();
 	go->GetTransform()->SetLocalPosition(20.f, 140.f, 0.f);
+	go->SetRenderLayer(1);
 	go->AddComponent(std::make_unique<dae::TextRenderComponent>(go.get(), "# Lives: 3", font));
 	auto livesDisplay = std::make_unique<LivesDisplayComponent>(go.get());
 	LivesDisplayComponent* livesDisplayPtr = livesDisplay.get();
@@ -101,9 +106,10 @@ void LoadPlayer1(dae::Scene& scene)
 
 	//Player 1
 	auto player1 = std::make_shared<dae::GameObject>();
+	player1->SetRenderLayer(2);
 	player1->GetTransform()->SetLocalPosition(200.f, 300.f, 0.f);
-	player1->AddComponent(std::make_unique<dae::RenderComponent>(player1.get(), "digdug.png"));
-	player1->AddComponent(std::make_unique<MoveComponent>(player1.get(), 50.f));
+	player1->AddComponent(std::make_unique<dae::RenderComponent>(player1.get(), "digdug.png", 3.f, 3.f));
+	player1->AddComponent(std::make_unique<MoveComponent>(player1.get()));
 	auto healthComponent = std::make_unique<HealthComponent>(player1.get(), 5);
 	healthComponent->AddObserver(livesDisplayPtr);
 	player1->AddComponent(std::move(healthComponent));
@@ -112,6 +118,7 @@ void LoadPlayer1(dae::Scene& scene)
 	//P1 Score Display
 	go = std::make_shared<dae::GameObject>();
 	go->GetTransform()->SetLocalPosition(20.f, 180.f, 0.f);
+	go->SetRenderLayer(1);
 	go->AddComponent(std::make_unique<dae::TextRenderComponent>(go.get(), "Score: 0", font));
 	auto scoreDisplay = std::make_unique<ScoreDisplayComponent>(go.get());
 	ScoreDisplayComponent* scoreDisplayPtr = scoreDisplay.get();
@@ -138,11 +145,12 @@ void LoadPlayer1(dae::Scene& scene)
 
 void LoadPlayer2(dae::Scene& scene)
 {
-	auto font = dae::ResourceManager::GetInstance().LoadFont("Lingua.otf", 16);
+	auto font = dae::ResourceManager::GetInstance().LoadFont("../Data/Fonts/Arcade.ttf", 8);
 
 	//P2 Lives Display
 	auto go = std::make_shared<dae::GameObject>();
 	go->GetTransform()->SetLocalPosition(20.f, 160.f, 0.f);
+	go->SetRenderLayer(1);
 	go->AddComponent(std::make_unique<dae::TextRenderComponent>(go.get(), "# Lives: 3", font));
 	auto livesDisplay = std::make_unique<LivesDisplayComponent>(go.get());
 	LivesDisplayComponent* livesDisplayPtr = livesDisplay.get();
@@ -151,9 +159,10 @@ void LoadPlayer2(dae::Scene& scene)
 
 	//Player 2
 	auto player2 = std::make_shared<dae::GameObject>();
-	player2->GetTransform()->SetLocalPosition(100.f, 300.f, 0.f);
+	player2->GetTransform()->SetLocalPosition(200.f, 300.f, 0.f);
+	player2->SetRenderLayer(2);
 	player2->AddComponent(std::make_unique<dae::RenderComponent>(player2.get(), "Pooka.png"));
-	player2->AddComponent(std::make_unique<MoveComponent>(player2.get(), 100.f));
+	player2->AddComponent(std::make_unique<MoveComponent>(player2.get()));
 	auto healthComponent = std::make_unique<HealthComponent>(player2.get(), 5);
 	healthComponent->AddObserver(livesDisplayPtr);
 	player2->AddComponent(std::move(healthComponent));
@@ -162,6 +171,7 @@ void LoadPlayer2(dae::Scene& scene)
 	//P2 Score Display
 	go = std::make_shared<dae::GameObject>();
 	go->GetTransform()->SetLocalPosition(20.f, 200.f, 0.f);
+	go->SetRenderLayer(1);
 	go->AddComponent(std::make_unique<dae::TextRenderComponent>(go.get(), "Score: 0", font));
 	auto scoreDisplay = std::make_unique<ScoreDisplayComponent>(go.get());
 	ScoreDisplayComponent* scoreDisplayPtr = scoreDisplay.get();
@@ -192,7 +202,7 @@ void LoadPlayer2(dae::Scene& scene)
 
 
 int main(int, char* []) {
-	dae::Minigin engine("../Data/");
+	dae::Minigin engine("../Data/", 600, 624, "DigDug");
 	engine.Run(load);
 	return 0;
 }

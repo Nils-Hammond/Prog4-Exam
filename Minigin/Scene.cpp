@@ -57,9 +57,15 @@ void dae::Scene::FixedUpdate()
 
 void Scene::Render() const
 {
-	for (const auto& object : m_objects)
+	for (int layer = 0; layer < MAX_RENDER_LAYERS; ++layer)
 	{
-		object->Render();
+		for (const auto& object : m_objects)
+		{
+			if (object->GetRenderLayer() == layer)
+			{
+				object->Render();
+			}
+		}
 	}
 }
 

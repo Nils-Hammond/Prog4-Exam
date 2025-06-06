@@ -8,6 +8,8 @@
 
 namespace dae
 {
+	const int MAX_RENDER_LAYERS = 10;
+
 	class GameObject final
 	{
 	public:
@@ -23,6 +25,8 @@ namespace dae
 		std::vector<GameObject*> GetChildren() { return m_pChildren; }
 		void Destroy();
 		bool IsToBeDestroyed() const { return m_toBeDestroyed; }
+		void SetRenderLayer(unsigned int layer);
+		int GetRenderLayer() const { return m_renderLayer; }
 
 		// Component management
 		template <typename T>
@@ -106,5 +110,6 @@ namespace dae
 		std::vector<GameObject*> m_pChildren{};
 		GameObject* m_parent{};
 		bool m_toBeDestroyed{ false };
+		unsigned int m_renderLayer{ 0 };
 	};
 }

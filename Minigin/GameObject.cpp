@@ -93,6 +93,19 @@ void dae::GameObject::Destroy()
 		SetParent(nullptr);
 }
 
+void dae::GameObject::SetRenderLayer(unsigned int layer)
+{
+	if (layer > MAX_RENDER_LAYERS)
+	{
+		throw std::out_of_range("Render layer must be between 0 and 10");
+	}
+	m_renderLayer = layer;
+	for (auto& child : m_pChildren)
+	{
+		child->SetRenderLayer(layer);
+	}
+}
+
 void dae::GameObject::SetParent(GameObject* parent, bool keepWorldPosition)
 {
 	if (IsChild(parent) || parent == this || m_parent == parent)
