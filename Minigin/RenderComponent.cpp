@@ -16,6 +16,11 @@ dae::RenderComponent::RenderComponent(GameObject* owner)
 {
 }
 
+dae::RenderComponent::RenderComponent(GameObject* owner, const std::string& filename, const float scale)
+	: RenderComponent(owner, filename, scale, scale)
+{
+}
+
 void dae::RenderComponent::Update()
 {
 	

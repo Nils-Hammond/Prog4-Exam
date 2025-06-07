@@ -20,13 +20,15 @@ namespace dae
 		void SetAngle(double angle);
 
 		RenderComponent(GameObject* owner);
-		RenderComponent(GameObject* owner, const std::string& filename, float scaleX = 1.f, float scaleY = 1.f);
+		RenderComponent(GameObject* owner, const std::string& filename, float scale = 1.f);
+		RenderComponent(GameObject* owner, const std::string& filename, float scaleX, float scaleY);
 		virtual ~RenderComponent() = default;
 		RenderComponent(const RenderComponent& other) = delete;
 		RenderComponent(RenderComponent&& other) = delete;
 		RenderComponent& operator=(const RenderComponent& other) = delete;
 		RenderComponent& operator=(RenderComponent&& other) = delete;
 	protected:
+		double GetAngle() const { return m_angle; }
 		std::shared_ptr<Texture2D> m_texture;
 	private:
 		float m_scaleX;

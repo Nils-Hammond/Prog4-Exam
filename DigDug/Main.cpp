@@ -25,6 +25,7 @@
 #include "LivesAndPoints.h"
 #include "LevelLoader.h"
 #include "MoveCharacterCommand.h"
+#include "SpriteRenderComponent.h"
 
 void LoadPlayer1(dae::Scene& scene);
 void LoadPlayer2(dae::Scene& scene);
@@ -54,8 +55,8 @@ void static load()
 {
 	auto& scene = dae::SceneManager::GetInstance().CreateScene("Demo");
 
-	LoadPlayer1(scene);
-	LoadPlayer2(scene);
+	//LoadPlayer1(scene);
+	//LoadPlayer2(scene);
 
 	LoadLevel("../Data/Levels/Level1.txt", scene);
 
@@ -108,7 +109,8 @@ void LoadPlayer1(dae::Scene& scene)
 	auto player1 = std::make_shared<dae::GameObject>();
 	player1->SetRenderLayer(2);
 	player1->GetTransform()->SetLocalPosition(200.f, 300.f, 0.f);
-	player1->AddComponent(std::make_unique<dae::RenderComponent>(player1.get(), "digdug.png", 3.f, 3.f));
+	//player1->AddComponent(std::make_unique<dae::RenderComponent>(player1.get(), "digdug.png", 3.f, 3.f));
+	player1->AddComponent(std::make_unique<dae::SpriteRenderComponent>(player1.get(), "DigDug0/Walking.png", 1, 2, 3.f));
 	player1->AddComponent(std::make_unique<MoveComponent>(player1.get()));
 	auto healthComponent = std::make_unique<HealthComponent>(player1.get(), 5);
 	healthComponent->AddObserver(livesDisplayPtr);
@@ -135,12 +137,11 @@ void LoadPlayer1(dae::Scene& scene)
 	inputManager.BindKeyboardCommand(SDLK_z, dae::InputManager::ButtonState::Down, std::move(pookaCommand));
 	inputManager.BindKeyboardCommand(SDLK_x, dae::InputManager::ButtonState::Down, std::move(fygarCommand));
 
-	inputManager.BindKeyboardCommand(SDLK_s, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player1.get(), glm::vec3(0.f, 1.f, 0.f), 50.f));
-	inputManager.BindKeyboardCommand(SDLK_w, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player1.get(), glm::vec3(0.f, -1.f, 0.f), 50.f));
-	inputManager.BindKeyboardCommand(SDLK_a, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player1.get(), glm::vec3(-1.f, 0.f, 0.f), 50.f));
-	inputManager.BindKeyboardCommand(SDLK_d, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player1.get(), glm::vec3(1.f, 0.f, 0.f), 50.f));
+	inputManager.BindKeyboardCommand(SDLK_s, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player1.get(), glm::vec3(0.f, 1.f, 0.f), 100.f));
+	inputManager.BindKeyboardCommand(SDLK_w, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player1.get(), glm::vec3(0.f, -1.f, 0.f), 100.f));
+	inputManager.BindKeyboardCommand(SDLK_a, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player1.get(), glm::vec3(-1.f, 0.f, 0.f), 100.f));
+	inputManager.BindKeyboardCommand(SDLK_d, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player1.get(), glm::vec3(1.f, 0.f, 0.f), 100.f));
 	inputManager.BindKeyboardCommand(SDLK_c, dae::InputManager::ButtonState::Down, std::make_unique<DieCommand>(player1.get()));
-
 }
 
 void LoadPlayer2(dae::Scene& scene)

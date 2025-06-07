@@ -90,4 +90,27 @@ void dae::Renderer::RenderTextureEx(const Texture2D& texture, const float x, con
 	SDL_RenderCopyEx(GetSDLRenderer(), texture.GetSDLTexture(), nullptr, &dst, angle, nullptr, flip);
 }
 
+void dae::Renderer::RenderSprite(const Texture2D& texture, float x, float y, SDL_Rect sourceRect, float scaleX, float scaleY, double angle) const
+{
+	SDL_Rect dst{};
+	dst.x = static_cast<int>(x);
+	dst.y = static_cast<int>(y);
+	dst.w = static_cast<int>(sourceRect.w * std::abs(scaleX));
+	dst.h = static_cast<int>(sourceRect.h * std::abs(scaleY));
+	SDL_RendererFlip flip = SDL_FLIP_NONE;
+	if (scaleX < 0.f && scaleY < 0.f)
+	{
+		flip = static_cast<SDL_RendererFlip>(SDL_FLIP_HORIZONTAL | SDL_FLIP_VERTICAL);
+	}
+	else if (scaleX < 0.f)
+	{
+		flip = SDL_FLIP_HORIZONTAL;
+	}
+	else if (scaleY < 0.f)
+	{
+		flip = SDL_FLIP_VERTICAL;
+	}
+	SDL_RenderCopyEx(GetSDLRenderer(), texture.GetSDLTexture(), &sourceRect, &dst, angle, nullptr, flip);
+}
+
 SDL_Renderer* dae::Renderer::GetSDLRenderer() const { return m_renderer; }
