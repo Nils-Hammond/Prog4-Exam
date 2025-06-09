@@ -66,6 +66,29 @@ void dae::Renderer::RenderTexture(const Texture2D& texture, const float x, const
 	SDL_RenderCopy(GetSDLRenderer(), texture.GetSDLTexture(), nullptr, &dst);
 }
 
+void dae::Renderer::PartialRenderTexture(const Texture2D& texture, SDL_Rect sourceRect, SDL_Rect destRect, float scaleX, float scaleY, double angle) const
+{
+	SDL_Rect dst{};
+	dst.x = static_cast<int>(destRect.x);
+	dst.y = static_cast<int>(destRect.y);
+	dst.w = static_cast<int>(destRect.w * std::abs(scaleX));
+	dst.h = static_cast<int>(destRect.h * std::abs(scaleY));
+	SDL_RendererFlip flip = SDL_FLIP_NONE;
+	if (scaleX < 0.f && scaleY < 0.f)
+	{
+		flip = static_cast<SDL_RendererFlip>(SDL_FLIP_HORIZONTAL | SDL_FLIP_VERTICAL);
+	}
+	else if (scaleX < 0.f)
+	{
+		flip = SDL_FLIP_HORIZONTAL;
+	}
+	else if (scaleY < 0.f)
+	{
+		flip = SDL_FLIP_VERTICAL;
+	}
+	SDL_RenderCopyEx(GetSDLRenderer(), texture.GetSDLTexture(), &sourceRect, &dst, angle, nullptr, flip);
+}
+
 void dae::Renderer::RenderTextureEx(const Texture2D& texture, const float x, const float y, const float scaleX, const float scaleY, const double angle) const
 {
 	SDL_Rect dst{};

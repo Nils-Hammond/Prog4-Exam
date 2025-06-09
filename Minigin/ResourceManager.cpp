@@ -5,6 +5,7 @@
 #include "Renderer.h"
 #include "Texture2D.h"
 #include "Font.h"
+#include "AudioClip.h"
 #include <iostream>
 
 namespace fs = std::filesystem;
@@ -39,6 +40,17 @@ std::shared_ptr<dae::Font> dae::ResourceManager::LoadFont(const std::string& fil
 	return m_loadedFonts.at(key);
 }
 
+std::shared_ptr<dae::AudioClip> dae::ResourceManager::LoadAudioClip(const std::string& file)
+{
+	const auto fullPath = m_dataPath / file;
+	const auto filename = fs::path(fullPath).filename().string();
+	if (m_loadedAudioClips.find(filename) == m_loadedAudioClips.end())
+	{
+		m_loadedAudioClips.insert(std::pair(filename, std::make_shared<AudioClip>(fullPath.string())));
+	}
+	return m_loadedAudioClips.at(filename);
+}
+
 void dae::ResourceManager::UnloadUnusedResources()
 {
 	for (auto it = m_loadedTextures.begin(); it != m_loadedTextures.end();)
@@ -56,4 +68,13 @@ void dae::ResourceManager::UnloadUnusedResources()
 		else
 			++it;
 	}
+	/*
+	for (auto it = m_loadedAudioClips.begin(); it != m_loadedAudioClips.end();)
+	{
+		if (it->second.use_count() == 1)
+			it = m_loadedAudioClips.erase(it);
+		else
+			++it;
+	}
+	*/
 }

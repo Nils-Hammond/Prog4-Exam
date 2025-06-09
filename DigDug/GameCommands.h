@@ -26,3 +26,14 @@ public:
 	DieCommand(dae::GameObject* actor);
 	void Execute() override;
 };
+
+class PlaySoundCommand : public dae::Command
+{
+	std::string m_soundFile;
+	int m_volume;
+	bool m_loop;
+	int m_channel;
+public:
+	PlaySoundCommand(const std::string& soundFile, int volume = 128, bool loop = false, int channel = -1);
+	void Execute() override;
+};

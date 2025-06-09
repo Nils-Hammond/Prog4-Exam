@@ -38,7 +38,7 @@ void MoveComponent::Update()
 
 void MoveComponent::SetMoveDirection(glm::vec3 direction)
 {
-	std::cout << "Direction: " << direction.x << ", " << direction.y << ", " << direction.z << std::endl;
+	//std::cout << "Direction: " << direction.x << ", " << direction.y << ", " << direction.z << std::endl;
 	m_direction = direction;
 	m_oldDirection = direction;
 	m_oldDirection /= glm::length(m_oldDirection);

@@ -1,7 +1,7 @@
 #include "SpriteRenderComponent.h"
 #include "DaeTime.h"
 #include "Texture2D.h"
-#include "SDL.h"
+#include "SDL_rect.h"
 #include "Transform.h"
 #include "GameObject.h"
 #include "Renderer.h"

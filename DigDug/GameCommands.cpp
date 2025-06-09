@@ -5,6 +5,7 @@
 #include <algorithm>
 #include "RenderComponent.h"
 #include "DaeTime.h"
+#include "ServiceLocator.h"
 
 GameActorCommand::GameActorCommand(dae::GameObject* actor) :
 	m_actor{ actor }
@@ -37,4 +38,14 @@ void DieCommand::Execute()
 	{
 		healthComponent->TakeDamage(healthComponent->GetHealth());
 	}
+}
+
+PlaySoundCommand::PlaySoundCommand(const std::string& soundFile, int volume, bool loop, int channel)
+	: m_soundFile(soundFile), m_volume(volume), m_loop(loop), m_channel(channel)
+{
+}
+
+void PlaySoundCommand::Execute()
+{
+	dae::ServiceLocator::GetSoundSystem().PlaySound(m_soundFile, m_volume, m_loop, m_channel);
 }

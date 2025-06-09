@@ -20,6 +20,7 @@ namespace dae
 
 		void RenderTexture(const Texture2D& texture, float x, float y) const;
 		void RenderTexture(const Texture2D& texture, float x, float y, float width, float height) const;
+		void PartialRenderTexture(const Texture2D& texture, SDL_Rect sourceRect, SDL_Rect destRect, float scaleX = 1.f, float scaleY = 1.f, double angle = 0.f) const;
 		void RenderTextureEx(const Texture2D& texture, float x, float y, float scaleX = 1.f, float scaleY = 1.f, double angle = 0.f) const;
 		void RenderSprite(const Texture2D& texture, float x, float y, SDL_Rect sourceRect, float scaleX = 1.f, float scaleY = 1.f, double angle = 0.f) const;
 
@@ -29,4 +30,3 @@ namespace dae
 		void SetBackgroundColor(const SDL_Color& color) { m_clearColor = color; }
 	};
 }
-

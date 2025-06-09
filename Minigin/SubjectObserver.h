@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <any>
 
 namespace dae
 {
@@ -30,7 +31,8 @@ namespace dae
 	struct Event
 	{
 		const EventId id;
-		explicit Event(EventId _id) : id{ _id } {}
+		std::any data;
+		explicit Event(EventId _id, std::any _data = {}) : id{ _id }, data{ std::move(_data) } {};
 	};
 
 	class Observer
@@ -45,7 +47,6 @@ namespace dae
 	public:
 		void AddObserver(Observer* observer);
 		void RemoveObserver(Observer* observer);
-	protected:
 		void Notify(Event event);
 	private:
 		std::vector<Observer*> m_Observers{};

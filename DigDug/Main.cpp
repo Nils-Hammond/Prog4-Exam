@@ -89,8 +89,16 @@ void static load()
 	go->AddComponent(std::make_unique<dae::TextRenderComponent>(go.get(), "Use WASD to move DigDug, C to inflict damage, Z and X to kill enemies", font));
 	go->SetRenderLayer(1);
 	scene.Add(go);
+
+	auto& inputManager = dae::InputManager::GetInstance();
+	auto playMusicCommand = std::make_unique<PlaySoundCommand>("Sounds/walkmusic.wav");
+	auto playHitSoundCommand = std::make_unique<PlaySoundCommand>("Sounds/PlayerHit.wav");
+	inputManager.BindKeyboardCommand(SDLK_z, dae::InputManager::ButtonState::Down, std::move(playMusicCommand));
+	inputManager.BindKeyboardCommand(SDLK_x, dae::InputManager::ButtonState::Down, std::move(playHitSoundCommand));
+
 }
 
+/*
 void LoadPlayer1(dae::Scene& scene)
 {
 	auto font = dae::ResourceManager::GetInstance().LoadFont("../Data/Fonts/Arcade.ttf", 8);
@@ -130,12 +138,6 @@ void LoadPlayer1(dae::Scene& scene)
 	//Input Binding
 	auto& inputManager = dae::InputManager::GetInstance();
 	// These should probably be a "EnemyDied" event with event arguments for the score or enemy type but I don't know how the eventArg from the example work
-	auto pookaCommand = std::make_unique<dae::TriggerEventCommand>(dae::Event(dae::make_sdbm_hash("PookaDied")));
-	pookaCommand->AddObserver(scoreDisplayPtr);
-	auto fygarCommand = std::make_unique<dae::TriggerEventCommand>(dae::Event(dae::make_sdbm_hash("FygarDied")));
-	fygarCommand->AddObserver(scoreDisplayPtr);
-	inputManager.BindKeyboardCommand(SDLK_z, dae::InputManager::ButtonState::Down, std::move(pookaCommand));
-	inputManager.BindKeyboardCommand(SDLK_x, dae::InputManager::ButtonState::Down, std::move(fygarCommand));
 
 	inputManager.BindKeyboardCommand(SDLK_s, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player1.get(), glm::vec3(0.f, 1.f, 0.f), 100.f));
 	inputManager.BindKeyboardCommand(SDLK_w, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player1.get(), glm::vec3(0.f, -1.f, 0.f), 100.f));
@@ -143,6 +145,7 @@ void LoadPlayer1(dae::Scene& scene)
 	inputManager.BindKeyboardCommand(SDLK_d, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player1.get(), glm::vec3(1.f, 0.f, 0.f), 100.f));
 	inputManager.BindKeyboardCommand(SDLK_c, dae::InputManager::ButtonState::Down, std::make_unique<DieCommand>(player1.get()));
 }
+*/
 
 void LoadPlayer2(dae::Scene& scene)
 {

@@ -10,6 +10,7 @@
 #include "Renderer.h"
 #include "ResourceManager.h"
 #include "DaeTime.h"
+#include "ServiceLocator.h"
 #include <chrono>
 #include <thread>
 
@@ -72,6 +73,8 @@ dae::Minigin::Minigin(const std::string& dataPath, const int windowWidth, const 
 	Time::GetInstance().Start();
 
 	InputManager::GetInstance().Init();
+	
+	ServiceLocator::RegisterSoundSystem(std::make_unique<SDLSoundSystem>());
 }
 
 dae::Minigin::~Minigin()

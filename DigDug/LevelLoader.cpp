@@ -9,10 +9,40 @@
 #include "MoveCharacterCommand.h"
 #include "SDL.h"
 #include "InputManager.h"
+#include "SubjectObserver.h"
+#include <algorithm>
+#include "ColliderComponent.h"
+#include "PlayerComponent.h"
 
 LevelLoader::LevelLoader(dae::GameObject* owner, dae::Scene* scene)
 	: BaseComponent(owner), m_currentScene(scene)
 {
+}
+
+static bool IsVerticalHole(const std::string& line, int x, int y)
+{
+	char leftSide{}, rightSide{};
+	if (x <= 0 || x >= line.size() - 1)
+	{
+		leftSide = 'd';
+	}
+	else
+	{
+		leftSide = line[x - 1];
+	}
+	if (y <= 0 || y >= line.size() - 1)
+	{
+		rightSide = 'd';
+	}
+	else
+	{
+		rightSide = line[x + 1];
+	}
+	if ((leftSide == 'd' || leftSide == 'r') && (rightSide == 'd' || rightSide == 'r'))
+	{
+		return true;
+	}
+	return false;
 }
 
 void LevelLoader::LoadLevel(const std::string& levelFile)
@@ -35,15 +65,18 @@ void LevelLoader::LoadLevel(const std::string& levelFile)
 			switch (c)
 			{
 			case '#':
-				SpawnHole(x, y);
+				SpawnHole(data, x, y);
 				break;
 			case 'P':
+				SpawnHole(data, x, y);
 				SpawnPlayer1(x, y);
 				break;
 			case 'p':
+				SpawnHole(data, x, y);
 				SpawnPooka(x, y);
 				break;
 			case 'f':
+				SpawnHole(data, x, y);
 				SpawnFygar(x, y);
 				break;
 			case 'r':
@@ -65,7 +98,6 @@ void LevelLoader::LoadLevel(const std::string& levelFile)
 
 void LevelLoader::SpawnPooka(int x, int y)
 {
-	SpawnHole(x, y);
 	auto pooka = std::make_shared<dae::GameObject>();
 	pooka->GetTransform()->SetLocalPosition(static_cast<float>(x * 48), static_cast<float>(y * 48), 0.f);
 	pooka->SetRenderLayer(2);
@@ -76,7 +108,6 @@ void LevelLoader::SpawnPooka(int x, int y)
 
 void LevelLoader::SpawnFygar(int x, int y)
 {
-	SpawnHole(x, y);
 	auto fygar = std::make_shared<dae::GameObject>();
 	fygar->GetTransform()->SetLocalPosition(static_cast<float>(x * 48), static_cast<float>(y * 48), 0.f);
 	fygar->SetRenderLayer(2);
@@ -94,6 +125,11 @@ static void LoadPlayer1(dae::Scene& scene, int x, int y)
 	player1->AddComponent(std::make_unique<MoveComponent>(player1.get()));
 	auto healthComponent = std::make_unique<HealthComponent>(player1.get(), 5);
 	player1->AddComponent(std::move(healthComponent));
+	player1->AddComponent(std::make_unique<dae::ColliderComponent>(player1.get(), dae::make_sdbm_hash("Player")));
+	player1->GetComponent<dae::ColliderComponent>()->ResizeColliderRect(42, 42);
+	player1->GetComponent<dae::ColliderComponent>()->OffsetColliderRect(3, 3);
+	player1->AddComponent(std::make_unique<PlayerComponent>(player1.get(), nullptr));
+
 	scene.Add(player1);
 
 	auto& inputManager = dae::InputManager::GetInstance();
@@ -107,7 +143,6 @@ static void LoadPlayer1(dae::Scene& scene, int x, int y)
 
 void LevelLoader::SpawnPlayer1(int x, int y)
 {
-	SpawnHole(x, y);
 	/*
 	auto player1 = std::make_shared<dae::GameObject>();
 	player1->GetTransform()->SetLocalPosition(static_cast<float>(x * 48), static_cast<float>(y * 48), 0.f);
@@ -121,7 +156,6 @@ void LevelLoader::SpawnPlayer1(int x, int y)
 
 void LevelLoader::SpawnPlayer2(int x, int y)
 {
-	SpawnHole(x, y);
 	auto player2 = std::make_shared<dae::GameObject>();
 	player2->GetTransform()->SetLocalPosition(static_cast<float>(x * 48), static_cast<float>(y * 48), 0.f);
 	player2->SetRenderLayer(2);
@@ -136,14 +170,18 @@ void LevelLoader::SpawnRock(int x, int y)
 	rock->GetTransform()->SetLocalPosition(static_cast<float>(x * 48), static_cast<float>(y * 48), 0.f);
 	rock->SetRenderLayer(2);
 	rock->AddComponent(std::make_unique<dae::SpriteRenderComponent>(rock.get(), "Rock/Default.png", 1, 1, 3.f));
+	rock->AddComponent(std::make_unique<dae::ColliderComponent>(rock.get(), dae::make_sdbm_hash("Rock")));
+	rock->GetComponent<dae::ColliderComponent>()->ResizeColliderRect(48, 48);
 	m_currentScene->Add(rock);
 }
 
-void LevelLoader::SpawnHole(int x, int y)
+void LevelLoader::SpawnHole(const std::string& line, int x, int y)
 {
 	auto hole = std::make_shared<dae::GameObject>();
 	hole->GetTransform()->SetLocalPosition(static_cast<float>(x * 48), static_cast<float>(y * 48), 0.f);
 	hole->SetRenderLayer(1);
 	hole->AddComponent(std::make_unique<dae::RenderComponent>(hole.get(), "DiggedArea.png", 3.f, 3.f));
+	if (IsVerticalHole(line, x, y))
+		hole->GetComponent<dae::RenderComponent>()->SetAngle(90.f);
 	m_currentScene->Add(hole);
 }
