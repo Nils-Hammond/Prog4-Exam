@@ -24,6 +24,7 @@ namespace dae
 		void OffsetColliderRect(int x, int y);
 		void ResizeColliderRect(int width, int height);
 		bool IsOverlapping(const ColliderComponent& other) const;
+		void OnCollision(const ColliderComponent& other);
 		void AddObserver(Observer* observer);
 		void RemoveObserver(Observer* observer);
 	private:
@@ -32,6 +33,5 @@ namespace dae
 		int m_yOffset;
 		SDL_Rect m_colliderRect;
 		Subject m_subject;
-		static std::vector<ColliderComponent*> m_colliders;
 	};
 }

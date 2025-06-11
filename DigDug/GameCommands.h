@@ -37,3 +37,10 @@ public:
 	PlaySoundCommand(const std::string& soundFile, int volume = 128, bool loop = false, int channel = -1);
 	void Execute() override;
 };
+
+class AttackCommand : public GameActorCommand
+{
+public:
+	AttackCommand(dae::GameObject* actor);
+	void Execute() override;
+};

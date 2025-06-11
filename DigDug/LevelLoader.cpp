@@ -13,6 +13,8 @@
 #include <algorithm>
 #include "ColliderComponent.h"
 #include "PlayerComponent.h"
+#include "ServiceLocator.h"
+#include "PumpComponent.h"
 
 LevelLoader::LevelLoader(dae::GameObject* owner, dae::Scene* scene)
 	: BaseComponent(owner), m_currentScene(scene)
@@ -22,7 +24,7 @@ LevelLoader::LevelLoader(dae::GameObject* owner, dae::Scene* scene)
 static bool IsVerticalHole(const std::string& line, int x, int y)
 {
 	char leftSide{}, rightSide{};
-	if (x <= 0 || x >= line.size() - 1)
+	if (x <= 0 || static_cast<unsigned>(x) >= line.size() - 1)
 	{
 		leftSide = 'd';
 	}
@@ -30,7 +32,7 @@ static bool IsVerticalHole(const std::string& line, int x, int y)
 	{
 		leftSide = line[x - 1];
 	}
-	if (y <= 0 || y >= line.size() - 1)
+	if (y <= 0 || static_cast<unsigned>(y) >= line.size() - 1)
 	{
 		rightSide = 'd';
 	}
@@ -118,8 +120,9 @@ void LevelLoader::SpawnFygar(int x, int y)
 
 static void LoadPlayer1(dae::Scene& scene, int x, int y)
 {
+	//dae::ServiceLocator::GetSoundSystem().PlaySound("Sounds/walkmusic.wav", 128, true, 0);
 	auto player1 = std::make_shared<dae::GameObject>();
-	player1->SetRenderLayer(2);
+	player1->SetRenderLayer(4);
 	player1->GetTransform()->SetLocalPosition(static_cast<float>(x * 48), static_cast<float>(y * 48), 0.f);
 	player1->AddComponent(std::make_unique<dae::SpriteRenderComponent>(player1.get(), "DigDug0/Walking.png", 1, 2, 3.f));
 	player1->AddComponent(std::make_unique<MoveComponent>(player1.get()));
@@ -128,7 +131,14 @@ static void LoadPlayer1(dae::Scene& scene, int x, int y)
 	player1->AddComponent(std::make_unique<dae::ColliderComponent>(player1.get(), dae::make_sdbm_hash("Player")));
 	player1->GetComponent<dae::ColliderComponent>()->ResizeColliderRect(42, 42);
 	player1->GetComponent<dae::ColliderComponent>()->OffsetColliderRect(3, 3);
-	player1->AddComponent(std::make_unique<PlayerComponent>(player1.get(), nullptr));
+	player1->AddComponent(std::make_unique<PlayerComponent>(player1.get()));
+
+	auto pumpObject = std::make_shared<dae::GameObject>();
+	pumpObject->SetRenderLayer(3);
+	pumpObject->SetParent(player1.get(), false);
+	pumpObject->AddComponent(std::make_unique<dae::ColliderComponent>(pumpObject.get(), dae::make_sdbm_hash("Pump")));
+	pumpObject->AddComponent(std::make_unique<PumpComponent>(pumpObject.get(), "Pump.png", 3.f));
+	scene.Add(pumpObject);
 
 	scene.Add(player1);
 
@@ -139,6 +149,7 @@ static void LoadPlayer1(dae::Scene& scene, int x, int y)
 	inputManager.BindKeyboardCommand(SDLK_a, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player1.get(), glm::vec3(-1.f, 0.f, 0.f), 100.f));
 	inputManager.BindKeyboardCommand(SDLK_d, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player1.get(), glm::vec3(1.f, 0.f, 0.f), 100.f));
 	inputManager.BindKeyboardCommand(SDLK_c, dae::InputManager::ButtonState::Down, std::make_unique<DieCommand>(player1.get()));
+	inputManager.BindKeyboardCommand(SDLK_SPACE, dae::InputManager::ButtonState::Down, std::make_unique<AttackCommand>(player1.get()));
 }
 
 void LevelLoader::SpawnPlayer1(int x, int y)

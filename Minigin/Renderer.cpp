@@ -2,6 +2,7 @@
 #include "Renderer.h"
 #include "SceneManager.h"
 #include "Texture2D.h"
+#include <iostream>
 
 static int GetOpenGLDriverIndex()
 {

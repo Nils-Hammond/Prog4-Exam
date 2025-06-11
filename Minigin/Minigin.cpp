@@ -75,6 +75,7 @@ dae::Minigin::Minigin(const std::string& dataPath, const int windowWidth, const 
 	InputManager::GetInstance().Init();
 	
 	ServiceLocator::RegisterSoundSystem(std::make_unique<SDLSoundSystem>());
+	ServiceLocator::RegisterCollisionSystem(std::make_unique<SimpleCollisionSystem>());
 }
 
 dae::Minigin::~Minigin()

@@ -5,15 +5,18 @@
 
 MoveComponent::MoveComponent(dae::GameObject* owner)
 	: dae::BaseComponent(owner), m_direction(), m_oldDirection(),
-	m_renderComponent(nullptr), m_isFacingRight(true)
+	m_renderComponent(nullptr), m_isFacingRight(true), m_isMoving(false), m_isActive(true)
 {
 	m_renderComponent = GetOwner()->GetComponent<dae::RenderComponent>();
 }
 
 void MoveComponent::Update()
 {
-	if (m_direction == glm::vec3(0.f, 0.f, 0.f))
+	if (m_direction == glm::vec3(0.f, 0.f, 0.f) || !m_isActive)
+	{
+		m_isMoving = false;
 		return;
+	}
 	glm::vec2 scale = m_renderComponent->GetScale();
 	if (m_direction.x > 0.f)
 	{
@@ -38,8 +41,15 @@ void MoveComponent::Update()
 
 void MoveComponent::SetMoveDirection(glm::vec3 direction)
 {
-	//std::cout << "Direction: " << direction.x << ", " << direction.y << ", " << direction.z << std::endl;
+	if (!m_isActive)
+		return;
+	m_isMoving = true;
 	m_direction = direction;
 	m_oldDirection = direction;
 	m_oldDirection /= glm::length(m_oldDirection);
+}
+
+bool MoveComponent::IsMoving() const
+{
+	return m_isMoving;
 }

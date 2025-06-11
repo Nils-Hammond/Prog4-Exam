@@ -1,0 +1,36 @@
+#pragma once
+
+#include <vector>
+namespace dae
+{
+	class ColliderComponent;
+	class CollisionSystem
+	{
+	public:
+		virtual ~CollisionSystem() {};
+		virtual void RegisterCollider(ColliderComponent* collider) = 0;
+		virtual void UnregisterCollider(ColliderComponent* collider) = 0;
+		virtual void FixedUpdate() = 0;
+		virtual std::vector<ColliderComponent*> GetCollisions(const ColliderComponent& collider) const = 0;
+	};
+
+	class SimpleCollisionSystem : public CollisionSystem
+	{
+	public:
+		void RegisterCollider(ColliderComponent* collider) override;
+		void UnregisterCollider(ColliderComponent* collider) override;
+		void FixedUpdate() override;
+		virtual std::vector<ColliderComponent*> GetCollisions(const ColliderComponent& collider) const override;
+	private:
+		std::vector<ColliderComponent*> m_pColliders;
+	};
+
+	class NullCollisionSysten : public CollisionSystem
+	{
+	public:
+		void RegisterCollider(ColliderComponent* ) override {}
+		void UnregisterCollider(ColliderComponent* ) override {}
+		void FixedUpdate() override {}
+		virtual std::vector<ColliderComponent*> GetCollisions(const ColliderComponent& ) const override { return {}; }
+	};
+}

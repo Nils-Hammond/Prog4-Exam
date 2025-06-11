@@ -6,6 +6,7 @@
 #include "RenderComponent.h"
 #include "DaeTime.h"
 #include "ServiceLocator.h"
+#include "PlayerComponent.h"
 
 GameActorCommand::GameActorCommand(dae::GameObject* actor) :
 	m_actor{ actor }
@@ -48,4 +49,18 @@ PlaySoundCommand::PlaySoundCommand(const std::string& soundFile, int volume, boo
 void PlaySoundCommand::Execute()
 {
 	dae::ServiceLocator::GetSoundSystem().PlaySound(m_soundFile, m_volume, m_loop, m_channel);
+}
+
+AttackCommand::AttackCommand(dae::GameObject* actor) :
+	GameActorCommand(actor)
+{
+}
+
+void AttackCommand::Execute()
+{
+	PlayerComponent* playerComponent = GetGameActor()->GetComponent<PlayerComponent>();
+	if (playerComponent != nullptr)
+	{
+		playerComponent->Attack();
+	}
 }

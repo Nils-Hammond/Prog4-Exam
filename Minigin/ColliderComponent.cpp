@@ -3,8 +3,8 @@
 #include "Renderer.h"
 #include "GameObject.h"
 #include "SpriteRenderComponent.h"
-
-std::vector<dae::ColliderComponent*> dae::ColliderComponent::m_colliders;
+#include "ServiceLocator.h"
+#include <iostream>
 
 dae::ColliderComponent::ColliderComponent(dae::GameObject* owner, const unsigned int tag)
 	: BaseComponent(owner)
@@ -14,27 +14,18 @@ dae::ColliderComponent::ColliderComponent(dae::GameObject* owner, const unsigned
 	, m_xOffset(0)
 	, m_yOffset(0)
 {
-	m_colliders.emplace_back(this);
+	ServiceLocator::GetCollisionSystem().RegisterCollider(this);
 }
 
 dae::ColliderComponent::~ColliderComponent()
 {
-	m_colliders.erase(std::remove(m_colliders.begin(), m_colliders.end(), this), m_colliders.end());
+	ServiceLocator::GetCollisionSystem().UnregisterCollider(this);
 }
 
 void dae::ColliderComponent::FixedUpdate()
 {
 	m_colliderRect.x = static_cast<int>(GetOwner()->GetTransform()->GetWorldPosition().x) + m_xOffset;
 	m_colliderRect.y = static_cast<int>(GetOwner()->GetTransform()->GetWorldPosition().y) + m_yOffset;
-
-	for (auto& collider : m_colliders)
-	{
-		if (collider != this && IsOverlapping(*collider))
-		{
-			m_subject.Notify(Event{ make_sdbm_hash("Collision"), collider });
-			collider->m_subject.Notify(Event{ make_sdbm_hash("Collision"), this });
-		}
-	}
 }
 
 void dae::ColliderComponent::Render() const
@@ -50,8 +41,8 @@ void dae::ColliderComponent::Render() const
 
 void dae::ColliderComponent::OffsetColliderRect(int x, int y)
 {
-	m_xOffset += x;
-	m_yOffset += y;
+	m_xOffset = x;
+	m_yOffset = y;
 }
 
 void dae::ColliderComponent::ResizeColliderRect(int width, int height)
@@ -63,6 +54,11 @@ void dae::ColliderComponent::ResizeColliderRect(int width, int height)
 bool dae::ColliderComponent::IsOverlapping(const ColliderComponent& other) const
 {
 	return SDL_HasIntersection(&m_colliderRect, &other.m_colliderRect) != 0;
+}
+
+void dae::ColliderComponent::OnCollision(const ColliderComponent& other)
+{
+	m_subject.Notify(Event{ make_sdbm_hash("OnCollision"), std::any{&other} });
 }
 
 void dae::ColliderComponent::AddObserver(Observer* observer)

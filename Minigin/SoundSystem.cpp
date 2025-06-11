@@ -117,7 +117,7 @@ void dae::SDLSoundSystem::SDLSoundSystemImpl::ProcessSounds()
 		if (!m_isRunning) break;
 		while (!m_soundQueue.empty())
 		{
-			auto soundData = std::move(m_soundQueue.front());
+			std::unique_ptr<AudioData> soundData = std::move(m_soundQueue.front());
 			m_soundQueue.pop();
 			lock.unlock();
 			auto audioClip = ResourceManager::GetInstance().LoadAudioClip(soundData.get()->filename);

@@ -26,8 +26,9 @@
 #include "LevelLoader.h"
 #include "MoveCharacterCommand.h"
 #include "SpriteRenderComponent.h"
+#include "GridCell.h"
 
-void LoadPlayer1(dae::Scene& scene);
+//void LoadPlayer1(dae::Scene& scene);
 void LoadPlayer2(dae::Scene& scene);
 
 template <typename T>
@@ -90,12 +91,19 @@ void static load()
 	go->SetRenderLayer(1);
 	scene.Add(go);
 
+	go = std::make_shared<dae::GameObject>();
+	go->GetTransform()->SetLocalPosition(48.f * 3, 48.f * 4, 0.f);
+	go->SetRenderLayer(2);
+	std::array<bool, 8> horizontal{ false, false, false, false, false, false, false, false };
+	std::array<bool, 8> vertical{ true, true, true, true, true, true, true, true };
+	go->AddComponent(std::make_unique<GridCell>(go.get(), vertical, horizontal));
+	scene.Add(go);
+
 	auto& inputManager = dae::InputManager::GetInstance();
 	auto playMusicCommand = std::make_unique<PlaySoundCommand>("Sounds/walkmusic.wav");
 	auto playHitSoundCommand = std::make_unique<PlaySoundCommand>("Sounds/PlayerHit.wav");
 	inputManager.BindKeyboardCommand(SDLK_z, dae::InputManager::ButtonState::Down, std::move(playMusicCommand));
 	inputManager.BindKeyboardCommand(SDLK_x, dae::InputManager::ButtonState::Down, std::move(playHitSoundCommand));
-
 }
 
 /*

@@ -1,5 +1,6 @@
 #include "Scene.h"
 #include "GameObject.h"
+#include "ServiceLocator.h"
 
 #include <algorithm>
 
@@ -49,6 +50,7 @@ void Scene::Update()
 
 void dae::Scene::FixedUpdate()
 {
+	ServiceLocator::GetCollisionSystem().FixedUpdate();
 	for (auto& object : m_objects)
 	{
 		object->FixedUpdate();
