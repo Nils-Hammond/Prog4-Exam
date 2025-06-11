@@ -36,7 +36,7 @@ void GridCell::Render() const
 	const auto& pos = GetOwner()->GetTransform()->GetWorldPosition();
 	SDL_Rect horizontalRectUp{ static_cast<int>(pos.x), static_cast<int>(pos.y) + 2 * scale, cellSize / 16, cellSize -3 * scale};
 	SDL_Rect horizontalRectDown{ static_cast<int>(pos.x), static_cast<int>(pos.y) + 1 * scale, cellSize / 16, cellSize - 3 * scale };
-	for (int i{}; i < m_horizontalSubCells.size(); ++i)
+	for (int i{}; static_cast<unsigned>(i) < m_horizontalSubCells.size(); ++i)
 	{
 		if (m_horizontalSubCells[i])
 		{
@@ -56,7 +56,7 @@ void GridCell::Render() const
 	}
 	SDL_Rect verticalRectleft{ static_cast<int>(pos.x) + 1 * scale, static_cast<int>(pos.y), cellSize - 3 * scale, cellSize / 16 };
 	SDL_Rect verticalRectright{ static_cast<int>(pos.x) + 2 * scale, static_cast<int>(pos.y), cellSize - 3 * scale, cellSize / 16 };
-	for (int i{}; i < m_verticalSubCells.size(); ++i)
+	for (int i{}; static_cast<unsigned>(i) < m_verticalSubCells.size(); ++i)
 	{
 		if (m_verticalSubCells[i])
 		{
