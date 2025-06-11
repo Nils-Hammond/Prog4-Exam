@@ -22,6 +22,7 @@ private:
 	void SpawnPlayer2(int x, int y);
 	void SpawnRock(int x, int y);
 	void SpawnHole(const std::string& line, int x, int y);
+	void SpawnDiggableCell(int x, int y);
 	dae::Scene* m_currentScene;
 };
 

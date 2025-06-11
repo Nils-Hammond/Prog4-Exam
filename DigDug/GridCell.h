@@ -2,9 +2,12 @@
 #include "BaseComponent.h"
 #include "glm.hpp"
 #include <array>
+#include "SubjectObserver.h"
 
-class CollisionComponent;
-class GridCell : public dae::BaseComponent
+namespace dae {
+	class ColliderComponent;
+}
+class GridCell : public dae::BaseComponent, public dae::Observer
 {
 public:
 	GridCell(dae::GameObject* owner);
@@ -17,6 +20,10 @@ public:
 	void Update() override;
 	void FixedUpdate() override;
 	void Render() const;
+	void OnNotify(dae::Event event) override;
 private:
-	std::array<bool, 8> m_verticalSubCells, m_horizontalSubCells;
+	void RevealSubcell(const dae::ColliderComponent& playerCollider);
+	static constexpr int NUM_SUB_CELLS{ 8 };
+	std::array<bool, NUM_SUB_CELLS> m_verticalSubCells, m_horizontalSubCells;
+	dae::ColliderComponent* m_pColliderComponent;
 };

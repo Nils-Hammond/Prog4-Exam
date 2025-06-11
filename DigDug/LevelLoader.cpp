@@ -15,6 +15,8 @@
 #include "PlayerComponent.h"
 #include "ServiceLocator.h"
 #include "PumpComponent.h"
+#include "GameConstants.h"
+#include "GridCell.h"
 
 LevelLoader::LevelLoader(dae::GameObject* owner, dae::Scene* scene)
 	: BaseComponent(owner), m_currentScene(scene)
@@ -84,6 +86,9 @@ void LevelLoader::LoadLevel(const std::string& levelFile)
 			case 'r':
 				SpawnRock(x, y);
 				break;
+			case 'd':
+				SpawnDiggableCell(x, y);
+				break;
 			}
 			
 			++x;
@@ -129,8 +134,8 @@ static void LoadPlayer1(dae::Scene& scene, int x, int y)
 	auto healthComponent = std::make_unique<HealthComponent>(player1.get(), 5);
 	player1->AddComponent(std::move(healthComponent));
 	player1->AddComponent(std::make_unique<dae::ColliderComponent>(player1.get(), dae::make_sdbm_hash("Player")));
-	player1->GetComponent<dae::ColliderComponent>()->ResizeColliderRect(42, 42);
-	player1->GetComponent<dae::ColliderComponent>()->OffsetColliderRect(3, 3);
+	player1->GetComponent<dae::ColliderComponent>()->ResizeColliderRect(GRID_SIZE - 12, GRID_SIZE - 12);
+	player1->GetComponent<dae::ColliderComponent>()->OffsetColliderRect(6, 6);
 	player1->AddComponent(std::make_unique<PlayerComponent>(player1.get()));
 
 	auto pumpObject = std::make_shared<dae::GameObject>();
@@ -195,4 +200,14 @@ void LevelLoader::SpawnHole(const std::string& line, int x, int y)
 	if (IsVerticalHole(line, x, y))
 		hole->GetComponent<dae::RenderComponent>()->SetAngle(90.f);
 	m_currentScene->Add(hole);
+}
+
+void LevelLoader::SpawnDiggableCell(int x, int y)
+{
+	auto cell = std::make_shared<dae::GameObject>();
+	cell->GetTransform()->SetLocalPosition(static_cast<float>(x * GRID_SIZE), static_cast<float>(y * GRID_SIZE), 0.f);
+	cell->SetRenderLayer(1);
+	cell->AddComponent(std::make_unique<dae::ColliderComponent>(cell.get(), dae::make_sdbm_hash("Dirt")));
+	cell->AddComponent(std::make_unique<GridCell>(cell.get()));
+	m_currentScene->Add(cell);
 }
