@@ -20,6 +20,8 @@ namespace dae
 		//void FixedUpdate() override;
 		void Render() const override;
 		unsigned int GetTag() const { return m_tag; }
+		void SetActive(bool isActive) { m_isActive = isActive; }
+		bool IsActive() const { return m_isActive; }
 		const SDL_Rect& GetColliderRect() const;
 		void OffsetColliderRect(int x, int y);
 		void ResizeColliderRect(int width, int height);
@@ -29,6 +31,7 @@ namespace dae
 		void RemoveObserver(Observer* observer);
 	private:
 		unsigned int m_tag;
+		bool m_isActive;
 		int m_xOffset;
 		int m_yOffset;
 		SDL_Rect m_colliderRect;

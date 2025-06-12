@@ -56,6 +56,12 @@ void dae::RenderComponent::SetScale(float scale)
 	m_scaleY = scale;
 }
 
+void dae::RenderComponent::SetScale(glm::vec2 scale)
+{
+	m_scaleX = scale.x;
+	m_scaleY = scale.y;
+}
+
 glm::vec2 dae::RenderComponent::GetScale() const
 {
 	return glm::vec2(m_scaleX, m_scaleY);

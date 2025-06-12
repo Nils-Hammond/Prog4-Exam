@@ -5,15 +5,19 @@
 #include "MoveComponent.h"
 #include "PumpComponent.h"
 #include "GameObject.h"
+#include "DaeTime.h"
 
-std::unique_ptr<PlayerState> IdleState::Update(PlayerComponent* player)
+using namespace PlayerStates;
+
+std::unique_ptr<PlayerStates::PlayerState> IdleState::Update(PlayerComponent* player)
 {
 	if (player->GetMoveComponent()->IsMoving())
 	{
-		return std::make_unique<MovingState>();
+		return std::make_unique<PlayerStates::MovingState>();
 	}
     return nullptr;
 }
+
 
 void IdleState::Exit(PlayerComponent* player)
 {
@@ -26,11 +30,15 @@ void IdleState::Enter(PlayerComponent* player)
     dae::ServiceLocator::GetSoundSystem().PauseChannel(0);
 }
 
-std::unique_ptr<PlayerState> MovingState::Update(PlayerComponent* player)
+std::unique_ptr<PlayerStates::PlayerState> MovingState::Update(PlayerComponent* player)
 {
 	if (!player->GetMoveComponent()->IsMoving())
 	{
-		return std::make_unique<IdleState>();
+		return std::make_unique<PlayerStates::IdleState>();
+	}
+	else if (player->GetMoveComponent()->IsHittingWall())
+	{
+		return std::make_unique<PlayerStates::DiggingState>();
 	}
 	return nullptr;
 }
@@ -48,12 +56,12 @@ void MovingState::Enter(PlayerComponent* player)
 	dae::ServiceLocator::GetSoundSystem().ResumeChannel(0);
 }
 
-std::unique_ptr<PlayerState> AttackingState::Update(PlayerComponent* )
+std::unique_ptr<PlayerStates::PlayerState> AttackingState::Update(PlayerComponent* )
 {
 	if (m_pumpComponent == nullptr)
-		return std::make_unique<IdleState>();
+		return std::make_unique<PlayerStates::IdleState>();
 	if (!m_pumpComponent->IsActive())
-		return std::make_unique<IdleState>();
+		return std::make_unique<PlayerStates::IdleState>();
     return nullptr;
 }
 
@@ -66,8 +74,9 @@ void AttackingState::Exit(PlayerComponent* player)
 void AttackingState::Enter(PlayerComponent* player)
 {
 	const std::string folder = "DigDug";
-	const std::string filename = "/Pumping.png";
+	const std::string filename = "/Walking.png";
 	player->GetSpriteRenderComponent()->SetTexture(folder + std::to_string(player->GetPlayerNumber()) + filename);
+	player->GetSpriteRenderComponent()->Reset();
 	player->GetSpriteRenderComponent()->Pause();
 	player->GetMoveComponent()->SetActive(false);
 
@@ -80,7 +89,7 @@ void AttackingState::Enter(PlayerComponent* player)
 	}
 }
 
-std::unique_ptr<PlayerState> DyingState::Update(PlayerComponent* )
+std::unique_ptr<PlayerStates::PlayerState> DyingState::Update(PlayerComponent* )
 {
     return nullptr;
 }
@@ -93,7 +102,7 @@ void DyingState::Enter(PlayerComponent* )
 {
 }
 
-std::unique_ptr<PlayerState> CrushedState::Update(PlayerComponent* )
+std::unique_ptr<PlayerStates::PlayerState> CrushedState::Update(PlayerComponent* )
 {
     return nullptr;
 }
@@ -102,13 +111,32 @@ void CrushedState::Exit(PlayerComponent* )
 {
 }
 
-void CrushedState::Enter(PlayerComponent* )
+void CrushedState::Enter(PlayerComponent* player)
 {
+	const std::string folder = "DigDug";
+	const std::string filename = "/CrushedByRock.png";
+	player->GetSpriteRenderComponent()->SetTexture(folder + std::to_string(player->GetPlayerNumber()) + filename);
+	player->GetSpriteRenderComponent()->Reset();
+	dae::ServiceLocator::GetSoundSystem().PlaySound("Sounds/RockHit.wav", 128, false, -1);
 }
 
-std::unique_ptr<PlayerState> DiggingState::Update(PlayerComponent* )
+std::unique_ptr<PlayerStates::PlayerState> DiggingState::Update(PlayerComponent* player)
 {
-    return nullptr;
+	shovelTimer += dae::Time::GetInstance().GetDeltaTime();
+	if (!player->GetMoveComponent()->IsMoving())
+	{
+		return std::make_unique<PlayerStates::IdleState>();
+	}
+	else if (shovelTimer >= MAX_SHOVEL_DURATION)
+	{
+		std::cout << "Stopped digging" << std::endl;
+		return std::make_unique<PlayerStates::MovingState>();
+	}
+	else if (player->GetMoveComponent()->IsHittingWall())
+	{
+		shovelTimer = 0.f;
+	}
+	return nullptr;
 }
 
 void DiggingState::Exit(PlayerComponent* )

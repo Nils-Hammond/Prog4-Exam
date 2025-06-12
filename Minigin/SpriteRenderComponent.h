@@ -22,13 +22,17 @@ namespace dae
 		void Play();
 		void Pause();
 		void Reset();
+		bool NextFrame();
+		bool PreviousFrame();
+		void SetSpriteGrid(unsigned int rows, unsigned int columns);
 	private:
+		const float DEFAULT_FRAME_DELAY{ 0.2f };
 		unsigned int m_rows;
 		unsigned int m_columns;
 		unsigned int m_currentFrame;
 		int m_frameHeight;
 		int m_frameWidth;
-		const float m_frameDelay;
+		float m_frameDelay;
 		float m_elapsedTime;
 		bool m_isPaused;
 		bool m_isLooping;

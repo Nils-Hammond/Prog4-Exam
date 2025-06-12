@@ -17,8 +17,10 @@ void dae::SimpleCollisionSystem::FixedUpdate()
 	{
 		for (size_t rightIndex = leftIndex + 1; rightIndex < m_pColliders.size(); ++rightIndex)
 		{
-			if (m_pColliders[rightIndex]->GetTag() == m_pColliders[leftIndex]->GetTag())
+			if (m_pColliders[rightIndex]->GetTag() == m_pColliders[leftIndex]->GetTag() 
+				|| !m_pColliders[rightIndex]->IsActive() || !m_pColliders[leftIndex]->IsActive())
 			{
+				// Skip check
 			}
 			else if (m_pColliders[leftIndex]->IsOverlapping(*m_pColliders[rightIndex]))
 			{
@@ -34,7 +36,7 @@ std::vector<dae::ColliderComponent*> dae::SimpleCollisionSystem::GetCollisions(c
 	std::vector<ColliderComponent*> overlaps;
 	for (const auto& other : m_pColliders)
 	{
-		if (other != &collider && collider.IsOverlapping(*other))
+		if (other != &collider && other->IsActive() && collider.IsOverlapping(*other))
 			overlaps.emplace_back(other);
 	}
 	return overlaps;

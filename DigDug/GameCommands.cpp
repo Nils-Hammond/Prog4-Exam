@@ -1,6 +1,5 @@
 #include "GameCommands.h"
 #include "GameObject.h"
-#include "MoveComponent.h"
 #include "LivesAndPoints.h"
 #include <algorithm>
 #include "RenderComponent.h"
@@ -13,18 +12,14 @@ GameActorCommand::GameActorCommand(dae::GameObject* actor) :
 {
 }
 
-MoveCommand::MoveCommand(dae::GameObject* actor, glm::vec3 direction)
-	: GameActorCommand(actor), m_direction(direction)
+MoveCommand::MoveCommand(dae::GameObject* actor, glm::vec3 direction, float speed)
+	: GameActorCommand(actor), m_direction(direction), m_speed(speed)
 {
 }
 
 void MoveCommand::Execute()
 {
-	MoveComponent* moveComponent = GetGameActor()->GetComponent<MoveComponent>();
-	if (moveComponent != nullptr)
-	{
-		moveComponent->SetMoveDirection(m_direction);
-	}
+	GetGameActor()->GetTransform()->SetLocalPosition(GetGameActor()->GetTransform()->GetLocalPosition() + m_direction * m_speed * dae::Time::GetInstance().GetDeltaTime());
 }
 
 DieCommand::DieCommand(dae::GameObject* actor) :

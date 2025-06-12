@@ -16,6 +16,7 @@ namespace dae
 		void SetTexture(const std::string& text);
 		void SetScale(float scaleX, float scaleY);
 		void SetScale(float scale);
+		void SetScale(glm::vec2 scale);
 		glm::vec2 GetScale() const;
 		void SetAngle(double angle);
 

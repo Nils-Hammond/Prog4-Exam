@@ -47,6 +47,7 @@ void PumpComponent::Update()
 		if (m_elapsedTime >= m_maxDuration)
 		{
 			m_isActive = false;
+			m_pColliderComponent->SetActive(false);
 			m_elapsedTime = 0.f;
 		}
 	}
@@ -94,12 +95,40 @@ void PumpComponent::Render() const
 void PumpComponent::Activate()
 {
 	m_direction = m_pPlayerComponent->GetMoveComponent()->GetFacingDirection();
+	m_pColliderComponent->SetActive(true);
 	m_isActive = true;
 }
 
 bool PumpComponent::IsActive() const
 {
 	return m_isActive;
+}
+
+void PumpComponent::OnNotify(dae::Event event)
+{
+	if (event.id == dae::make_sdbm_hash("OnCollision"))
+	{
+		try
+		{
+			auto* collider = std::any_cast<const dae::ColliderComponent*>(event.data);
+			if (collider && collider->GetTag() == dae::make_sdbm_hash("Enemy"))
+			{
+				m_isPumping = true;
+				m_elapsedTime = 0.f;
+				UpdateCollider();
+			}
+		}
+		catch (const std::exception& e)
+		{
+			std::cerr << "Error getting event data: " << e.what() << std::endl;
+			return;
+		}
+	}
+}
+
+dae::ColliderComponent* PumpComponent::GetHitEnemy() const
+{
+	return nullptr;
 }
 
 void PumpComponent::UpdateCollider()

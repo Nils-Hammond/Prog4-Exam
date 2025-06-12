@@ -8,7 +8,7 @@
 #include <exception>
 
 PlayerComponent::PlayerComponent(dae::GameObject* owner, int playerNumber)
-	: dae::BaseComponent(owner), m_pState(std::make_unique<IdleState>())
+	: dae::BaseComponent(owner), m_pState(std::make_unique<PlayerStates::IdleState>())
 	, m_pMoveComponent(nullptr)
 	, m_pSpriteRenderComponent(nullptr)
 	, m_playerNumber(playerNumber)
@@ -26,6 +26,8 @@ PlayerComponent::PlayerComponent(dae::GameObject* owner, int playerNumber)
 	}
 	m_pState->Enter(this);
 }
+
+PlayerComponent::~PlayerComponent() = default;
 
 void PlayerComponent::Update()
 {
@@ -68,10 +70,13 @@ MoveComponent* PlayerComponent::GetMoveComponent() const
 
 void PlayerComponent::Attack()
 {
-	SetState(std::make_unique<AttackingState>());
+	if (dynamic_cast<PlayerStates::AttackingState*>(m_pState.get()) == nullptr)
+	{
+		SetState(std::make_unique<PlayerStates::AttackingState>());
+	}
 }
 
-void PlayerComponent::SetState(std::unique_ptr<PlayerState> newState)
+void PlayerComponent::SetState(std::unique_ptr<PlayerStates::PlayerState> newState)
 {
 	m_pState.get()->Exit(this);
 	m_pState = std::move(newState);

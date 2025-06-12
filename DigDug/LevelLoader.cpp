@@ -13,13 +13,14 @@
 #include <algorithm>
 #include "ColliderComponent.h"
 #include "PlayerComponent.h"
+#include "PookaComponent.h"
 #include "ServiceLocator.h"
 #include "PumpComponent.h"
 #include "GameConstants.h"
 #include "GridCell.h"
 
 LevelLoader::LevelLoader(dae::GameObject* owner, dae::Scene* scene)
-	: BaseComponent(owner), m_currentScene(scene)
+	: BaseComponent(owner), m_currentScene(scene), m_gridCells()
 {
 }
 
@@ -111,28 +112,33 @@ void LevelLoader::LoadLevel(const std::string& levelFile)
 	bg->SetRenderLayer(0);
 	bg->AddComponent(std::make_unique<dae::RenderComponent>(bg.get(), "Tiles/Background.png", 3.f, 3.f));
 	m_currentScene->Add(bg);
+	
+	MakeEnemiesAwareOfPlayer();
 }
 
 void LevelLoader::SpawnPooka(int x, int y)
 {
 	auto pooka = std::make_shared<dae::GameObject>();
+	m_pEntities.emplace_back(pooka.get());
 	pooka->GetTransform()->SetLocalPosition(static_cast<float>(x * 48), static_cast<float>(y * 48), 0.f);
-	pooka->SetRenderLayer(2);
+	pooka->SetRenderLayer(4);
 	pooka->AddComponent(std::make_unique<dae::SpriteRenderComponent>(pooka.get(), "Pooka/Default.png", 1, 2, 3.f));
-	pooka->AddComponent(std::make_unique<dae::ColliderComponent>(pooka.get(), dae::make_sdbm_hash("Pooka")));
+	pooka->AddComponent(std::make_unique<dae::ColliderComponent>(pooka.get(), dae::make_sdbm_hash("Enemy")));
 	pooka->GetComponent<dae::ColliderComponent>()->ResizeColliderRect(GRID_SIZE - 12, GRID_SIZE - 12);
 	pooka->GetComponent<dae::ColliderComponent>()->OffsetColliderRect(6, 6);
 	pooka->AddComponent(std::make_unique<MoveComponent>(pooka.get(), m_gridCells));
+	pooka->AddComponent(std::make_unique<PookaComponent>(pooka.get()));
 	m_currentScene->Add(pooka);
 }
 
 void LevelLoader::SpawnFygar(int x, int y)
 {
 	auto fygar = std::make_shared<dae::GameObject>();
+	m_pEntities.emplace_back(fygar.get());
 	fygar->GetTransform()->SetLocalPosition(static_cast<float>(x * 48), static_cast<float>(y * 48), 0.f);
-	fygar->SetRenderLayer(2);
+	fygar->SetRenderLayer(4);
 	fygar->AddComponent(std::make_unique<dae::SpriteRenderComponent>(fygar.get(), "Fygar/Default.png", 1, 2, 3.f));
-	fygar->AddComponent(std::make_unique<dae::ColliderComponent>(fygar.get(), dae::make_sdbm_hash("Fygar")));
+	fygar->AddComponent(std::make_unique<dae::ColliderComponent>(fygar.get(), dae::make_sdbm_hash("Enemy")));
 	fygar->GetComponent<dae::ColliderComponent>()->ResizeColliderRect(GRID_SIZE - 12, GRID_SIZE - 12);
 	fygar->GetComponent<dae::ColliderComponent>()->OffsetColliderRect(6, 6);
 	fygar->AddComponent(std::make_unique<MoveComponent>(fygar.get(), m_gridCells));
@@ -143,6 +149,7 @@ void LevelLoader::SpawnPlayer1(int x, int y)
 {
 	//dae::ServiceLocator::GetSoundSystem().PlaySound("Sounds/walkmusic.wav", 128, true, 0);
 	auto player1 = std::make_shared<dae::GameObject>();
+	m_pEntities.emplace_back(player1.get());
 	player1->SetRenderLayer(4);
 	player1->GetTransform()->SetLocalPosition(static_cast<float>(x * 48), static_cast<float>(y * 48), 0.f);
 	player1->AddComponent(std::make_unique<dae::SpriteRenderComponent>(player1.get(), "DigDug0/Walking.png", 1, 2, 3.f));
@@ -176,6 +183,7 @@ void LevelLoader::SpawnPlayer1(int x, int y)
 void LevelLoader::SpawnPlayer2(int x, int y)
 {
 	auto player2 = std::make_shared<dae::GameObject>();
+	m_pEntities.emplace_back(player2.get());
 	player2->SetRenderLayer(4);
 	player2->GetTransform()->SetLocalPosition(static_cast<float>(x * 48), static_cast<float>(y * 48), 0.f);
 	player2->AddComponent(std::make_unique<dae::SpriteRenderComponent>(player2.get(), "DigDug1/Walking.png", 1, 2, 3.f));
@@ -245,4 +253,29 @@ void LevelLoader::SpawnDiggableCell(int x, int y)
 	cell->AddComponent(std::make_unique<GridCell>(cell.get()));
 	m_gridCells[x + y * LEVEL_WIDTH] = cell->GetComponent<GridCell>();
 	m_currentScene->Add(cell);
+}
+
+void LevelLoader::MakeEnemiesAwareOfPlayer()
+{
+	std::vector<const dae::GameObject*> players;
+	for (const auto& entity : m_pEntities)
+	{
+		if (entity->GetComponent<PlayerComponent>())
+		{
+			players.emplace_back(entity);
+		}
+	}
+	for (const auto& entity : m_pEntities)
+	{
+		if (entity->GetComponent<PookaComponent>())
+		{
+			auto pookaComponent = entity->GetComponent<PookaComponent>();
+			pookaComponent->SetPlayers(players);
+		}
+		//else if (entity->GetComponent<FygarComponent>())
+		//{
+		//	auto fygarComponent = entity->GetComponent<FygarComponent>();
+		//	fygarComponent->SetPlayers(players);
+		//}
+	}
 }

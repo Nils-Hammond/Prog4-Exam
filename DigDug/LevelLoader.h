@@ -26,7 +26,9 @@ private:
 	void SpawnRock(int x, int y);
 	void SpawnHole(const std::string& line, int x, int y);
 	void SpawnDiggableCell(int x, int y);
+	void MakeEnemiesAwareOfPlayer();
 	std::array<GridCell*, LEVEL_WIDTH* LEVEL_HEIGHT> m_gridCells;
+	std::vector<dae::GameObject*> m_pEntities;
 	dae::Scene* m_currentScene;
 };
 

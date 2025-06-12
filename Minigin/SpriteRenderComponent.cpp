@@ -13,7 +13,7 @@ dae::SpriteRenderComponent::SpriteRenderComponent(dae::GameObject* owner, const 
 	, m_currentFrame(0)
 	, m_frameHeight(0)
 	, m_frameWidth(0)
-	, m_frameDelay(0.2f)
+	, m_frameDelay(DEFAULT_FRAME_DELAY)
 	, m_elapsedTime(0.0f)
 	, m_isPaused(false)
 	, m_isLooping(true)
@@ -83,4 +83,41 @@ void dae::SpriteRenderComponent::Reset()
 {
 	m_currentFrame = 0;
 	m_elapsedTime = 0.0f;
+}
+
+// Return true if there is a Next or Previous frame
+
+bool dae::SpriteRenderComponent::NextFrame()
+{
+	++m_currentFrame;
+	if (m_currentFrame >= m_rows * m_columns)
+	{
+		m_currentFrame = m_columns * m_rows - 1;
+		return false;
+	}
+	return true;
+}
+
+bool dae::SpriteRenderComponent::PreviousFrame()
+{
+	--m_currentFrame;
+	if (m_currentFrame < 0)
+	{
+		m_currentFrame = 0;
+		return false;
+	}
+	return true;
+}
+
+void dae::SpriteRenderComponent::SetSpriteGrid(unsigned int rows, unsigned int columns)
+{
+	m_rows = rows;
+	m_columns = columns;
+	if (m_texture)
+	{
+		SDL_QueryTexture(m_texture->GetSDLTexture(), nullptr, nullptr, &m_frameWidth, &m_frameHeight);
+		m_frameWidth /= m_columns;
+		m_frameHeight /= m_rows;
+	}
+	Reset();
 }

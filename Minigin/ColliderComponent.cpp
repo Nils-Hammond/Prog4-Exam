@@ -13,6 +13,7 @@ dae::ColliderComponent::ColliderComponent(dae::GameObject* owner, const unsigned
 	, m_subject()
 	, m_xOffset(0)
 	, m_yOffset(0)
+	, m_isActive(true)
 {
 	ServiceLocator::GetCollisionSystem().RegisterCollider(this);
 }
@@ -31,6 +32,8 @@ void dae::ColliderComponent::Update()
 void dae::ColliderComponent::Render() const
 {
 #if _DEBUG
+	if (!m_isActive)
+		return;
 	SDL_Renderer* sdlRenderer = dae::Renderer::GetInstance().GetSDLRenderer();
 
 	SDL_SetRenderDrawColor(sdlRenderer, 0, 0, 255, 255);

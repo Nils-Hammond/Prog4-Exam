@@ -164,6 +164,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="FPSComponent.cpp" />
+    <ClCompile Include="FygarState.cpp" />
     <ClCompile Include="GameCommands.cpp" />
     <ClCompile Include="GridCell.cpp" />
     <ClCompile Include="LevelLoader.cpp" />
@@ -174,6 +175,8 @@
     <ClCompile Include="MoveComponent.cpp" />
     <ClCompile Include="PlayerComponent.cpp" />
     <ClCompile Include="PlayerState.cpp" />
+    <ClCompile Include="PookaComponent.cpp" />
+    <ClCompile Include="PookaState.cpp" />
     <ClCompile Include="PumpComponent.cpp" />
     <ClCompile Include="RotateAround.cpp" />
     <ClCompile Include="SelfDestruct.cpp" />
@@ -181,6 +184,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FPSComponent.h" />
+    <ClInclude Include="FygarState.h" />
     <ClInclude Include="GameCommands.h" />
     <ClInclude Include="GameConstants.h" />
     <ClInclude Include="GridCell.h" />
@@ -190,6 +194,8 @@
     <ClInclude Include="MoveComponent.h" />
     <ClInclude Include="PlayerComponent.h" />
     <ClInclude Include="PlayerState.h" />
+    <ClInclude Include="PookaComponent.h" />
+    <ClInclude Include="PookaState.h" />
     <ClInclude Include="PumpComponent.h" />
     <ClInclude Include="RotateAround.h" />
     <ClInclude Include="SelfDestruct.h" />

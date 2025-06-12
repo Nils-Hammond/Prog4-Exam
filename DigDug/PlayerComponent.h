@@ -7,13 +7,15 @@ namespace dae {
 	class SpriteRenderComponent;
 }
 
-class PlayerState;
+namespace PlayerStates {
+	class PlayerState;
+}
 class MoveComponent;
 class PlayerComponent : public dae::BaseComponent, public dae::Observer
 {
 public:
 	PlayerComponent(dae::GameObject* owner, int playerNumber = 0);
-	~PlayerComponent() = default;
+	~PlayerComponent();
 	PlayerComponent(const PlayerComponent& other) = delete;
 	PlayerComponent(PlayerComponent&& other) = delete;
 	PlayerComponent& operator=(const PlayerComponent& other) = delete;
@@ -26,8 +28,8 @@ public:
 	int GetPlayerNumber() const { return m_playerNumber; }
 	void Attack();
 private:
-	void SetState(std::unique_ptr<PlayerState> newState);
-	std::unique_ptr<PlayerState> m_pState;
+	void SetState(std::unique_ptr<PlayerStates::PlayerState> newState);
+	std::unique_ptr<PlayerStates::PlayerState> m_pState;
 	MoveComponent* m_pMoveComponent;
 	dae::SpriteRenderComponent* m_pSpriteRenderComponent;
 	int m_playerNumber;

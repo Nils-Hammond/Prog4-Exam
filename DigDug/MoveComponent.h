@@ -25,6 +25,7 @@ public:
 	glm::vec3 GetFacingDirection() const { return m_oldDirection; }
 	bool IsFacingRight() const { return m_isFacingRight; }
 	bool IsMoving() const;
+	bool IsHittingWall() const { return m_hitWall; }
 	void SetActive(bool isActive) { m_isActive = isActive; }
 private:
 	bool CanMoveTo(const glm::vec2& newPos);
@@ -34,6 +35,7 @@ private:
 	bool m_isMoving;
 	bool m_isActive;
 	bool m_canDig;
+	bool m_hitWall;
 	std::array<GridCell*, LEVEL_WIDTH * LEVEL_HEIGHT> m_grid;
 	dae::RenderComponent* m_renderComponent;
 	dae::ColliderComponent* m_collider;
