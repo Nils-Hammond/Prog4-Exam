@@ -176,7 +176,7 @@ void LoadPlayer2(dae::Scene& scene)
 	player2->GetTransform()->SetLocalPosition(200.f, 300.f, 0.f);
 	player2->SetRenderLayer(2);
 	player2->AddComponent(std::make_unique<dae::RenderComponent>(player2.get(), "Pooka.png"));
-	player2->AddComponent(std::make_unique<MoveComponent>(player2.get()));
+	//player2->AddComponent(std::make_unique<MoveComponent>(player2.get()));
 	auto healthComponent = std::make_unique<HealthComponent>(player2.get(), 5);
 	healthComponent->AddObserver(livesDisplayPtr);
 	player2->AddComponent(std::move(healthComponent));

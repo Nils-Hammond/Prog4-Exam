@@ -25,6 +25,5 @@ namespace dae
 		glm::vec3 m_localPosition;
 		glm::vec3 m_worldPosition;
 		bool m_positionIsDirty{ true };
-
 	};
 }

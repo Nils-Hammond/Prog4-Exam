@@ -14,32 +14,6 @@ MoveCharacterCommand::MoveCharacterCommand(dae::GameObject* actor, glm::vec3 dir
 //    return std::round(value / cellSize) * cellSize;
 //}
 
-
-void rotateCharacter(dae::GameObject*, glm::vec3 direction)
-{
-    //dae::RenderComponent* renderComponent = actor->GetComponent<dae::RenderComponent>();
-
-    std::cout << "Direction: " << direction.x << ", " << direction.y << std::endl;
-    /*
-    if (renderComponent == nullptr)
-        return;
-    if (direction.x > 0.f) {
-        renderComponent->SetScale(2.f, 2.f);
-        renderComponent->SetAngle(0.f);
-    }
-    else if (direction.x < 0.f) {
-        renderComponent->SetScale(-2.f, 2.f);
-        renderComponent->SetAngle(0.f);
-    }
-    else if (direction.y > 0.f) {
-        renderComponent->SetAngle(90.f);
-    }
-    else if (direction.y < 0.f) {
-        renderComponent->SetAngle(-90.f);
-    }
-    */
-}
-
 void MoveCharacterCommand::Execute()
 {
     constexpr float cellSize = 48.0f;

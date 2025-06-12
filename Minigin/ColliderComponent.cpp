@@ -22,7 +22,7 @@ dae::ColliderComponent::~ColliderComponent()
 	ServiceLocator::GetCollisionSystem().UnregisterCollider(this);
 }
 
-void dae::ColliderComponent::FixedUpdate()
+void dae::ColliderComponent::Update()
 {
 	m_colliderRect.x = static_cast<int>(GetOwner()->GetTransform()->GetWorldPosition().x) + m_xOffset;
 	m_colliderRect.y = static_cast<int>(GetOwner()->GetTransform()->GetWorldPosition().y) + m_yOffset;
@@ -37,6 +37,11 @@ void dae::ColliderComponent::Render() const
 
 	SDL_RenderDrawRect(sdlRenderer, &m_colliderRect);
 #endif
+}
+
+const SDL_Rect& dae::ColliderComponent::GetColliderRect() const
+{
+	return m_colliderRect;
 }
 
 void dae::ColliderComponent::OffsetColliderRect(int x, int y)

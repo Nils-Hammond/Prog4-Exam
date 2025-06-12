@@ -23,6 +23,8 @@ LevelLoader::LevelLoader(dae::GameObject* owner, dae::Scene* scene)
 {
 }
 
+LevelLoader::~LevelLoader() = default;
+
 static bool IsVerticalHole(const std::string& line, int x, int y)
 {
 	char leftSide{}, rightSide{};
@@ -58,6 +60,13 @@ void LevelLoader::LoadLevel(const std::string& levelFile)
 		return;
 	}
 	std::string data;
+
+	// Initialize grid cells
+	for (int i = 0; i < LEVEL_WIDTH * LEVEL_HEIGHT; ++i)
+	{
+		SpawnDiggableCell(i % LEVEL_WIDTH, i / LEVEL_WIDTH);
+	}
+
 	int y = 0;
 	while (std::getline(file, data))
 	{
@@ -71,9 +80,13 @@ void LevelLoader::LoadLevel(const std::string& levelFile)
 			case '#':
 				SpawnHole(data, x, y);
 				break;
-			case 'P':
+			case '1':
 				SpawnHole(data, x, y);
 				SpawnPlayer1(x, y);
+				break;
+			case '2':
+				SpawnHole(data, x, y);
+				SpawnPlayer2(x, y);
 				break;
 			case 'p':
 				SpawnHole(data, x, y);
@@ -85,9 +98,6 @@ void LevelLoader::LoadLevel(const std::string& levelFile)
 				break;
 			case 'r':
 				SpawnRock(x, y);
-				break;
-			case 'd':
-				SpawnDiggableCell(x, y);
 				break;
 			}
 			
@@ -109,7 +119,10 @@ void LevelLoader::SpawnPooka(int x, int y)
 	pooka->GetTransform()->SetLocalPosition(static_cast<float>(x * 48), static_cast<float>(y * 48), 0.f);
 	pooka->SetRenderLayer(2);
 	pooka->AddComponent(std::make_unique<dae::SpriteRenderComponent>(pooka.get(), "Pooka/Default.png", 1, 2, 3.f));
-	pooka->AddComponent(std::make_unique<MoveComponent>(pooka.get()));
+	pooka->AddComponent(std::make_unique<dae::ColliderComponent>(pooka.get(), dae::make_sdbm_hash("Pooka")));
+	pooka->GetComponent<dae::ColliderComponent>()->ResizeColliderRect(GRID_SIZE - 12, GRID_SIZE - 12);
+	pooka->GetComponent<dae::ColliderComponent>()->OffsetColliderRect(6, 6);
+	pooka->AddComponent(std::make_unique<MoveComponent>(pooka.get(), m_gridCells));
 	m_currentScene->Add(pooka);
 }
 
@@ -119,23 +132,26 @@ void LevelLoader::SpawnFygar(int x, int y)
 	fygar->GetTransform()->SetLocalPosition(static_cast<float>(x * 48), static_cast<float>(y * 48), 0.f);
 	fygar->SetRenderLayer(2);
 	fygar->AddComponent(std::make_unique<dae::SpriteRenderComponent>(fygar.get(), "Fygar/Default.png", 1, 2, 3.f));
-	fygar->AddComponent(std::make_unique<MoveComponent>(fygar.get()));
+	fygar->AddComponent(std::make_unique<dae::ColliderComponent>(fygar.get(), dae::make_sdbm_hash("Fygar")));
+	fygar->GetComponent<dae::ColliderComponent>()->ResizeColliderRect(GRID_SIZE - 12, GRID_SIZE - 12);
+	fygar->GetComponent<dae::ColliderComponent>()->OffsetColliderRect(6, 6);
+	fygar->AddComponent(std::make_unique<MoveComponent>(fygar.get(), m_gridCells));
 	m_currentScene->Add(fygar);
 }
 
-static void LoadPlayer1(dae::Scene& scene, int x, int y)
+void LevelLoader::SpawnPlayer1(int x, int y)
 {
 	//dae::ServiceLocator::GetSoundSystem().PlaySound("Sounds/walkmusic.wav", 128, true, 0);
 	auto player1 = std::make_shared<dae::GameObject>();
 	player1->SetRenderLayer(4);
 	player1->GetTransform()->SetLocalPosition(static_cast<float>(x * 48), static_cast<float>(y * 48), 0.f);
 	player1->AddComponent(std::make_unique<dae::SpriteRenderComponent>(player1.get(), "DigDug0/Walking.png", 1, 2, 3.f));
-	player1->AddComponent(std::make_unique<MoveComponent>(player1.get()));
+	player1->AddComponent(std::make_unique<dae::ColliderComponent>(player1.get(), dae::make_sdbm_hash("Player")));
+	player1->GetComponent<dae::ColliderComponent>()->ResizeColliderRect(GRID_SIZE - 14, GRID_SIZE - 14);
+	player1->GetComponent<dae::ColliderComponent>()->OffsetColliderRect(7, 7);
+	player1->AddComponent(std::make_unique<MoveComponent>(player1.get(), m_gridCells, true));
 	auto healthComponent = std::make_unique<HealthComponent>(player1.get(), 5);
 	player1->AddComponent(std::move(healthComponent));
-	player1->AddComponent(std::make_unique<dae::ColliderComponent>(player1.get(), dae::make_sdbm_hash("Player")));
-	player1->GetComponent<dae::ColliderComponent>()->ResizeColliderRect(GRID_SIZE - 12, GRID_SIZE - 12);
-	player1->GetComponent<dae::ColliderComponent>()->OffsetColliderRect(6, 6);
 	player1->AddComponent(std::make_unique<PlayerComponent>(player1.get()));
 
 	auto pumpObject = std::make_shared<dae::GameObject>();
@@ -143,9 +159,9 @@ static void LoadPlayer1(dae::Scene& scene, int x, int y)
 	pumpObject->SetParent(player1.get(), false);
 	pumpObject->AddComponent(std::make_unique<dae::ColliderComponent>(pumpObject.get(), dae::make_sdbm_hash("Pump")));
 	pumpObject->AddComponent(std::make_unique<PumpComponent>(pumpObject.get(), "Pump.png", 3.f));
-	scene.Add(pumpObject);
+	m_currentScene->Add(pumpObject);
 
-	scene.Add(player1);
+	m_currentScene->Add(player1);
 
 	auto& inputManager = dae::InputManager::GetInstance();
 
@@ -157,27 +173,35 @@ static void LoadPlayer1(dae::Scene& scene, int x, int y)
 	inputManager.BindKeyboardCommand(SDLK_SPACE, dae::InputManager::ButtonState::Down, std::make_unique<AttackCommand>(player1.get()));
 }
 
-void LevelLoader::SpawnPlayer1(int x, int y)
-{
-	/*
-	auto player1 = std::make_shared<dae::GameObject>();
-	player1->GetTransform()->SetLocalPosition(static_cast<float>(x * 48), static_cast<float>(y * 48), 0.f);
-	player1->SetRenderLayer(2);
-	player1->AddComponent(std::make_unique<dae::RenderComponent>(player1.get(), "DigDug0/Walking.png", 3.f, 3.f));
-	player1->AddComponent(std::make_unique<MoveComponent>(player1.get()));
-	m_currentScene->Add(player1);
-	*/
-	LoadPlayer1(*m_currentScene, x, y);
-}
-
 void LevelLoader::SpawnPlayer2(int x, int y)
 {
 	auto player2 = std::make_shared<dae::GameObject>();
+	player2->SetRenderLayer(4);
 	player2->GetTransform()->SetLocalPosition(static_cast<float>(x * 48), static_cast<float>(y * 48), 0.f);
-	player2->SetRenderLayer(2);
 	player2->AddComponent(std::make_unique<dae::SpriteRenderComponent>(player2.get(), "DigDug1/Walking.png", 1, 2, 3.f));
-	player2->AddComponent(std::make_unique<MoveComponent>(player2.get()));
+	player2->AddComponent(std::make_unique<dae::ColliderComponent>(player2.get(), dae::make_sdbm_hash("Player2")));
+	player2->GetComponent<dae::ColliderComponent>()->ResizeColliderRect(GRID_SIZE - 14, GRID_SIZE - 14);
+	player2->GetComponent<dae::ColliderComponent>()->OffsetColliderRect(7, 7);
+	player2->AddComponent(std::make_unique<MoveComponent>(player2.get(), m_gridCells));
+	auto healthComponent = std::make_unique<HealthComponent>(player2.get(), 5);
+	player2->AddComponent(std::move(healthComponent));
+	player2->AddComponent(std::make_unique<PlayerComponent>(player2.get(), 1));
+
+	auto pumpObject = std::make_shared<dae::GameObject>();
+	pumpObject->SetRenderLayer(3);
+	pumpObject->SetParent(player2.get(), false);
+	pumpObject->AddComponent(std::make_unique<dae::ColliderComponent>(pumpObject.get(), dae::make_sdbm_hash("Pump")));
+	pumpObject->AddComponent(std::make_unique<PumpComponent>(pumpObject.get(), "Pump.png", 3.f));
+	m_currentScene->Add(pumpObject);
+
 	m_currentScene->Add(player2);
+
+	auto& inputManager = dae::InputManager::GetInstance();
+
+	inputManager.BindKeyboardCommand(SDLK_UP, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player2.get(), glm::vec3(0.f, -1.f, 0.f)));
+	inputManager.BindKeyboardCommand(SDLK_DOWN, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player2.get(), glm::vec3(0.f, 1.f, 0.f)));
+	inputManager.BindKeyboardCommand(SDLK_LEFT, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player2.get(), glm::vec3(-1.f, 0.f, 0.f)));
+	inputManager.BindKeyboardCommand(SDLK_RIGHT, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player2.get(), glm::vec3(1.f, 0.f, 0.f)));
 }
 
 void LevelLoader::SpawnRock(int x, int y)
@@ -193,6 +217,7 @@ void LevelLoader::SpawnRock(int x, int y)
 
 void LevelLoader::SpawnHole(const std::string& line, int x, int y)
 {
+	/*
 	auto hole = std::make_shared<dae::GameObject>();
 	hole->GetTransform()->SetLocalPosition(static_cast<float>(x * 48), static_cast<float>(y * 48), 0.f);
 	hole->SetRenderLayer(1);
@@ -200,6 +225,15 @@ void LevelLoader::SpawnHole(const std::string& line, int x, int y)
 	if (IsVerticalHole(line, x, y))
 		hole->GetComponent<dae::RenderComponent>()->SetAngle(90.f);
 	m_currentScene->Add(hole);
+	*/
+	if (IsVerticalHole(line, x, y))
+	{
+		m_gridCells[x + y * LEVEL_WIDTH]->CreateTunnel(false);
+	}
+	else
+	{
+		m_gridCells[x + y * LEVEL_WIDTH]->CreateTunnel(true);
+	}
 }
 
 void LevelLoader::SpawnDiggableCell(int x, int y)
@@ -209,5 +243,6 @@ void LevelLoader::SpawnDiggableCell(int x, int y)
 	cell->SetRenderLayer(1);
 	cell->AddComponent(std::make_unique<dae::ColliderComponent>(cell.get(), dae::make_sdbm_hash("Dirt")));
 	cell->AddComponent(std::make_unique<GridCell>(cell.get()));
+	m_gridCells[x + y * LEVEL_WIDTH] = cell->GetComponent<GridCell>();
 	m_currentScene->Add(cell);
 }

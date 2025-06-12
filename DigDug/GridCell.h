@@ -11,7 +11,6 @@ class GridCell : public dae::BaseComponent, public dae::Observer
 {
 public:
 	GridCell(dae::GameObject* owner);
-	GridCell(dae::GameObject* owner, std::array<bool, 8> verticalCells, std::array<bool, 8> horiontalCells);
 	~GridCell();
 	GridCell(const GridCell& other) = delete;
 	GridCell(GridCell&& other) = delete;
@@ -19,11 +18,18 @@ public:
 	GridCell& operator=(GridCell&& other) = delete;
 	void Update() override;
 	void FixedUpdate() override;
-	void Render() const;
+	void Render() const override;
+	bool IsSubCellDug(size_t index, bool horizontal);
 	void OnNotify(dae::Event event) override;
+	void CreateTunnel(bool horizontal);
+	void Print() const;
+
+	static constexpr int NUM_SUB_CELLS{ 8 };
 private:
 	void RevealSubcell(const dae::ColliderComponent& playerCollider);
-	static constexpr int NUM_SUB_CELLS{ 8 };
+	void DigCellCenter();
+	void CleanSubCells();
 	std::array<bool, NUM_SUB_CELLS> m_verticalSubCells, m_horizontalSubCells;
 	dae::ColliderComponent* m_pColliderComponent;
+	glm::vec3 m_previousPlayerDirection;
 };

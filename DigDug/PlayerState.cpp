@@ -44,6 +44,7 @@ void MovingState::Enter(PlayerComponent* player)
 	const std::string folder = "DigDug";
 	const std::string filename = "/Walking.png";
 	player->GetSpriteRenderComponent()->SetTexture(folder + std::to_string(player->GetPlayerNumber()) + filename);
+	player->GetSpriteRenderComponent()->Reset();
 	dae::ServiceLocator::GetSoundSystem().ResumeChannel(0);
 }
 

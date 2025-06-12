@@ -7,11 +7,11 @@
 #include <iostream>
 #include <exception>
 
-PlayerComponent::PlayerComponent(dae::GameObject* owner)
+PlayerComponent::PlayerComponent(dae::GameObject* owner, int playerNumber)
 	: dae::BaseComponent(owner), m_pState(std::make_unique<IdleState>())
 	, m_pMoveComponent(nullptr)
 	, m_pSpriteRenderComponent(nullptr)
-	, m_playerNumber(0)
+	, m_playerNumber(playerNumber)
 {
 	GetOwner()->GetComponent<dae::ColliderComponent>()->AddObserver(this);
 	m_pMoveComponent = GetOwner()->GetComponent<MoveComponent>();

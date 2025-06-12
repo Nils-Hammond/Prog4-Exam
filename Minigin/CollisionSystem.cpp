@@ -17,7 +17,10 @@ void dae::SimpleCollisionSystem::FixedUpdate()
 	{
 		for (size_t rightIndex = leftIndex + 1; rightIndex < m_pColliders.size(); ++rightIndex)
 		{
-			if (m_pColliders[leftIndex]->IsOverlapping(*m_pColliders[rightIndex]))
+			if (m_pColliders[rightIndex]->GetTag() == m_pColliders[leftIndex]->GetTag())
+			{
+			}
+			else if (m_pColliders[leftIndex]->IsOverlapping(*m_pColliders[rightIndex]))
 			{
 				m_pColliders[leftIndex]->OnCollision(*m_pColliders[rightIndex]);
 				m_pColliders[rightIndex]->OnCollision(*m_pColliders[leftIndex]);

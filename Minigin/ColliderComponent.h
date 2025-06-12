@@ -16,11 +16,11 @@ namespace dae
 		ColliderComponent& operator=(const ColliderComponent& other) = delete;
 		ColliderComponent& operator=(ColliderComponent&& other) = delete;
 
-		void Update() override {};
-		void FixedUpdate() override;
+		void Update() override;
+		//void FixedUpdate() override;
 		void Render() const override;
 		unsigned int GetTag() const { return m_tag; }
-		const SDL_Rect& GetColliderRect() const { return m_colliderRect; }
+		const SDL_Rect& GetColliderRect() const;
 		void OffsetColliderRect(int x, int y);
 		void ResizeColliderRect(int width, int height);
 		bool IsOverlapping(const ColliderComponent& other) const;

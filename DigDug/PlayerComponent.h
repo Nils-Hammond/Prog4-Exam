@@ -12,7 +12,7 @@ class MoveComponent;
 class PlayerComponent : public dae::BaseComponent, public dae::Observer
 {
 public:
-	PlayerComponent(dae::GameObject* owner);
+	PlayerComponent(dae::GameObject* owner, int playerNumber = 0);
 	~PlayerComponent() = default;
 	PlayerComponent(const PlayerComponent& other) = delete;
 	PlayerComponent(PlayerComponent&& other) = delete;

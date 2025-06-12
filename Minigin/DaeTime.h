@@ -18,6 +18,6 @@ namespace dae
 		std::chrono::steady_clock::time_point m_CurrentTime;
 		float m_DeltaTime{};
 		const long MS_PER_FRAME{ 16 };
-		const float FIXED_TIME_STEP{ 0.1f };
+		const float FIXED_TIME_STEP{ 0.05f };
 	};
 }

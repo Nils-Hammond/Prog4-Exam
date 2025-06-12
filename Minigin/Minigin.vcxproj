@@ -201,6 +201,7 @@ xcopy "$(SolutionDir)3rdParty\SDL2_ttf\lib\$(PlatformTarget)\*.dll" "$(OutputPat
   <ItemGroup>
     <ClInclude Include="AudioClip.h" />
     <ClInclude Include="CollisionSystem.h" />
+    <ClInclude Include="EngineUtils.h" />
     <ClInclude Include="ServiceLocator.h" />
     <ClInclude Include="SoundSystem.h" />
     <ClInclude Include="BaseComponent.h" />
@@ -227,6 +228,7 @@ xcopy "$(SolutionDir)3rdParty\SDL2_ttf\lib\$(PlatformTarget)\*.dll" "$(OutputPat
   <ItemGroup>
     <ClCompile Include="AudioClip.cpp" />
     <ClCompile Include="CollisionSystem.cpp" />
+    <ClCompile Include="EngineUtils.cpp" />
     <ClCompile Include="ServiceLocator.cpp" />
     <ClCompile Include="SoundSystem.cpp" />
     <ClCompile Include="BaseComponent.cpp" />
