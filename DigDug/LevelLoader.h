@@ -51,6 +51,7 @@ private:
 	bool m_firstLoad;
 	bool m_startResetTimer;
 	bool m_startNextTimer;
+	bool m_isGameOver;
 	float m_timer;
 	std::string m_levelFolderPath;
 

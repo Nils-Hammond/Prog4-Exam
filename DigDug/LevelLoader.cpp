@@ -34,6 +34,7 @@ LevelLoader::LevelLoader(dae::GameObject* owner, dae::Scene* scene, bool versus)
 	, m_startResetTimer(false)
 	, m_startNextTimer(false)
 	, m_firstLoad(false)
+	, m_isGameOver(false)
 	, m_levelNumber()
 	, m_pEnemies()
 	, m_pUIObjects()
@@ -74,6 +75,8 @@ static bool IsVerticalHole(const std::string& line, int x, int y)
 
 void LevelLoader::Update()
 {
+	if (m_isGameOver)
+		return;
 	if (m_startResetTimer || m_startNextTimer)
 	{
 		m_timer += dae::Time::GetInstance().GetDeltaTime();
@@ -138,6 +141,7 @@ void LevelLoader::OnNotify(dae::Event event)
 				{
 					enemy->Destroy();
 				}
+				m_isGameOver = true;
 				PrintGameOver();
 			}
 		}
@@ -181,6 +185,7 @@ void LevelLoader::LoadNextLevel()
 	{
 		PrintYouWin();
 		ClearLevel();
+		m_isGameOver = true;
 		m_pPlayer1->GetOwner()->SetRenderLayer(-1);
 		if (m_pPlayer2) m_pPlayer2->GetOwner()->SetRenderLayer(-1);
 		return;
