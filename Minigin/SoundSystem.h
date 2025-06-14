@@ -13,7 +13,7 @@ namespace dae
 		virtual void PauseChannel(const int channel) = 0;
 		virtual void ResumeChannel(const int channel) = 0;
 		virtual void ToggleMute() = 0;
-		//virtual bool CheckChannel(const int channel) = 0;
+		virtual bool CheckChannel(const int channel) = 0;
 	};
 
 	class SDLSoundSystem final : public SoundSystem
@@ -26,7 +26,7 @@ namespace dae
 		void PauseChannel(const int channel) override;
 		void ResumeChannel(const int channel) override;
 		void ToggleMute() override;
-		//bool CheckChannel(const int channel) override;
+		bool CheckChannel(const int channel) override;
 	private:
 		class SDLSoundSystemImpl;
 		std::unique_ptr<SDLSoundSystemImpl> m_pImpl;
@@ -40,6 +40,6 @@ namespace dae
 		void PauseChannel(const int) override {}
 		void ResumeChannel(const int) override {}
 		void ToggleMute() override {}
-		//bool CheckChannel(const int channel) { return false };
+		bool CheckChannel(const int ) { return false; }
 	};
 }

@@ -99,12 +99,8 @@ void PlayerComponent::Reset()
 	GetOwner()->GetTransform()->SetLocalPosition(m_initialPosition);
 	GetOwner()->SetRenderLayer(3);
 	SetState(std::make_unique<PlayerStates::IdleState>());
+	m_pMoveComponent->SetActive(true);
 	m_isDead = false;
-}
-
-void PlayerComponent::UpdateRespawn()
-{
-	m_initialPosition = GetOwner()->GetTransform()->GetWorldPosition();
 }
 
 void PlayerComponent::SetState(std::unique_ptr<PlayerStates::PlayerState> newState)

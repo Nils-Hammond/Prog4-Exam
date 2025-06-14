@@ -30,7 +30,6 @@ public:
 	bool IsAttacking() const { return m_isAttacking; }
 	bool IsDead() const;
 	void Reset();
-	void UpdateRespawn();
 private:
 	void SetState(std::unique_ptr<PlayerStates::PlayerState> newState);
 	std::unique_ptr<PlayerStates::PlayerState> m_pState;

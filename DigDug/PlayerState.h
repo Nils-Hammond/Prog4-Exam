@@ -61,7 +61,7 @@ namespace PlayerStates
 		const dae::ColliderComponent* m_pEnemyCollider{ nullptr };
 		float m_attackTimer{};
 		const float ATTACK_COOLDOWN{ 0.55f };
-		EnemyComponent* m_pEnemy;
+		EnemyComponent* m_pEnemy{};
 	};
 
 	class DyingState : public PlayerState

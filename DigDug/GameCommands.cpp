@@ -133,4 +133,9 @@ LoadNextLevelCommand::LoadNextLevelCommand(dae::GameObject* levelLoaderActor) :
 
 void LoadNextLevelCommand::Execute()
 {
+	LevelLoader* levelLoader = GetGameActor()->GetComponent<LevelLoader>();
+	if (levelLoader != nullptr)
+	{
+		levelLoader->LoadNextLevel();
+	}
 }

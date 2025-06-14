@@ -21,9 +21,9 @@ public:
 
 	void Update() override;
 	void LoadLevel(const std::string& levelFile);
+	void LoadNextLevel();
 	void OnNotify(dae::Event event);
 private:
-	void LoadNextLevel();
 	void SpawnLevelObjects(const std::string& levelFile);
 	void ClearLevel();
 	void SpawnPooka(int x, int y);

@@ -30,7 +30,7 @@ void IdleState::Exit(PlayerComponent* player)
 void IdleState::Enter(PlayerComponent* player)
 {
     player->GetSpriteRenderComponent()->Pause();
-    dae::ServiceLocator::GetSoundSystem().PauseChannel(0);
+    dae::ServiceLocator::GetSoundSystem().PauseChannel(MUSIC_CHANNEL);
 }
 
 std::unique_ptr<PlayerStates::PlayerState> MovingState::Update(PlayerComponent* player)
@@ -56,7 +56,10 @@ void MovingState::Enter(PlayerComponent* player)
 	const std::string filename = "/Walking.png";
 	player->GetSpriteRenderComponent()->SetTexture(folder + std::to_string(player->GetPlayerNumber()) + filename);
 	player->GetSpriteRenderComponent()->Reset();
-	dae::ServiceLocator::GetSoundSystem().ResumeChannel(0);
+	if (dae::ServiceLocator::GetSoundSystem().CheckChannel(MUSIC_CHANNEL))
+		dae::ServiceLocator::GetSoundSystem().ResumeChannel(MUSIC_CHANNEL);
+	else
+		dae::ServiceLocator::GetSoundSystem().PlaySound("Sounds/walkmusic.wav", 128, true, MUSIC_CHANNEL);
 }
 
 std::unique_ptr<PlayerStates::PlayerState> AttackingState::Update(PlayerComponent* player)
@@ -106,7 +109,7 @@ void AttackingState::Exit(PlayerComponent* player)
 {
 	player->GetMoveComponent()->SetActive(true);
 	player->GetSpriteRenderComponent()->Play();
-	dae::ServiceLocator::GetSoundSystem().StopChannel(1);
+	dae::ServiceLocator::GetSoundSystem().StopChannel(PUMP_SOUND_CHANNEL);
 }
 
 void AttackingState::Enter(PlayerComponent* player)
@@ -123,8 +126,9 @@ void AttackingState::Enter(PlayerComponent* player)
 	{
 		m_pumpComponent->Activate();
 		player->GetMoveComponent()->SetActive(false);
-		dae::ServiceLocator::GetSoundSystem().PlaySound("Sounds/PumpShoot.wav", 128, true, 1);
+		dae::ServiceLocator::GetSoundSystem().PlaySound("Sounds/PumpShoot.wav", 128, true, PUMP_SOUND_CHANNEL);
 	}
+	dae::ServiceLocator::GetSoundSystem().PauseChannel(MUSIC_CHANNEL);
 }
 
 std::unique_ptr<PlayerStates::PlayerState> DyingState::Update(PlayerComponent* player)
@@ -162,6 +166,7 @@ void DyingState::Enter(PlayerComponent* player)
 	player->GetMoveComponent()->SetActive(false);
 	auto dieCommand = std::make_unique<DieCommand>(player->GetOwner());
 	dieCommand->Execute();
+	dae::ServiceLocator::GetSoundSystem().PauseChannel(MUSIC_CHANNEL);
 }
 
 std::unique_ptr<PlayerStates::PlayerState> CrushedState::Update(PlayerComponent* )
@@ -209,5 +214,8 @@ void DiggingState::Enter(PlayerComponent* player)
     const std::string folder = "DigDug";
 	const std::string filename = "/Digging.png";
 	player->GetSpriteRenderComponent()->SetTexture(folder + std::to_string(player->GetPlayerNumber()) + filename);
-	dae::ServiceLocator::GetSoundSystem().ResumeChannel(0);
+	if (dae::ServiceLocator::GetSoundSystem().CheckChannel(MUSIC_CHANNEL))
+		dae::ServiceLocator::GetSoundSystem().ResumeChannel(MUSIC_CHANNEL);
+	else
+		dae::ServiceLocator::GetSoundSystem().PlaySound("Sounds/walkmusic.wav", 128, true, MUSIC_CHANNEL);
 }

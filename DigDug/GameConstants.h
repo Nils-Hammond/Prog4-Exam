@@ -8,3 +8,5 @@ constexpr int SPRITE_SCALE = 3;
 constexpr std::string_view SCENE_NAME = "DigDug";
 constexpr float ENEMY_GHOST_SPEED = 60.f;
 constexpr int LEVEL_COUNT = 4;
+constexpr int MUSIC_CHANNEL = 1;
+constexpr int PUMP_SOUND_CHANNEL = 0;

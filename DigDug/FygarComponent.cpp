@@ -42,7 +42,6 @@ void FygarComponent::OnNotify(dae::Event event)
 			auto* collider = std::any_cast<const dae::ColliderComponent*>(event.data);
 			if (collider && collider->GetTag() == dae::make_sdbm_hash("Pump"))
 			{
-				std::cout << "Pooka collided with a pump" << std::endl;
 				if (dynamic_cast<FygarStates::InflatedState*>(m_pState.get()) == nullptr)
 				{
 					SetState(std::make_unique<FygarStates::InflatedState>());

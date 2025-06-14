@@ -18,6 +18,7 @@ public:
 	void PauseChannel(const int channel);
 	void ResumeChannel(const int channel);
 	void ToggleMute();
+	bool CheckChannel(const int channel);
 private:
 	struct AudioData
 	{
@@ -109,12 +110,16 @@ void dae::SDLSoundSystem::SDLSoundSystemImpl::ResumeChannel(const int channel)
 void dae::SDLSoundSystem::SDLSoundSystemImpl::ToggleMute()
 {
 	m_isMuted = !m_isMuted;
-	std::string debug = m_isMuted ? "Muting Sound" : "Unumuting Sound";
-	std::cout << debug << std::endl;
-	if (m_isMuted)
+	StopChannel(-1);
+}
+
+bool dae::SDLSoundSystem::SDLSoundSystemImpl::CheckChannel(const int channel)
+{
+	if (Mix_Playing(channel) != 0)
 	{
-		StopChannel(-1);
+		return true;
 	}
+	return false;
 }
 
 void dae::SDLSoundSystem::SDLSoundSystemImpl::ProcessSounds()
@@ -170,4 +175,9 @@ void dae::SDLSoundSystem::ResumeChannel(const int channel)
 void dae::SDLSoundSystem::ToggleMute()
 {
 	m_pImpl->ToggleMute();
+}
+
+bool dae::SDLSoundSystem::CheckChannel(const int channel)
+{
+	return m_pImpl->CheckChannel(channel);
 }

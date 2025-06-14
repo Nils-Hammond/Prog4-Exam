@@ -44,6 +44,31 @@ void CheckComponent(const std::string& templateName, const dae::GameObject& obje
 	}
 }
 
+void PrintControls()
+{
+	std::cout << "=== CONTROLS DIG DUG ===\n\n";
+
+	std::cout << "===       MENU       ===\n";
+	std::cout << "Selection up/down/right/left : WASD or D-Pad\n";
+	std::cout << "Accept selection : Space bar or south button (A on XBox)\n\n";
+
+	std::cout << "===      INGAME      ===\n";
+	std::cout << "Mute : F2\n";
+	std::cout << "Skip level : F1\n\n";
+
+	std::cout << "===   SINGLEPLAYER   ===\n";
+	std::cout << "Move : WASD or D-Pad\n";
+	std::cout << "Shoot pump/pump to enemy : Space bar or south button (A on XBox)\n\n";
+
+	std::cout << "===   MULTIPLAYER   ===\n";
+	std::cout << "=       Player1       =\n";
+	std::cout << "Move : WASD\n";
+	std::cout << "Shoot pump/pump to enemy : Space bar\n";
+	std::cout << "=       Player2       =\n";
+	std::cout << "Move : D-Pad\n";
+	std::cout << "Shoot pump/pump to enemy : South button (A on XBox)\n";
+}
+
 void LoadLevel(const std::string& levelFile, dae::Scene& scene)
 {
 	auto levelLoader = std::make_shared<dae::GameObject>();
@@ -72,6 +97,8 @@ void LoadMenu(dae::Scene& scene)
 
 void static load()
 {
+	PrintControls();
+
 	auto& scene = dae::SceneManager::GetInstance().CreateScene(std::string(SCENE_NAME));
 
 	LoadMenu(scene);

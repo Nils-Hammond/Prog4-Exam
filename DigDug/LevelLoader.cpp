@@ -95,12 +95,30 @@ void LevelLoader::Update()
 	std::erase_if(m_pEnemies, [](auto* enemy) {
 		return enemy == nullptr || enemy->IsToBeDestroyed();});
 
-	if (m_levelNumber < LEVEL_COUNT && m_pEnemies.size() == 0)
+	if (m_levelNumber <= LEVEL_COUNT && m_pEnemies.size() == 0)
 	{
 		if (!m_startNextTimer)
-			dae::ServiceLocator::GetSoundSystem().PlaySound("Sounds/Victory.wav", 128, false, -1);
+		{
+			dae::ServiceLocator::GetSoundSystem().PlaySound("Sounds/Victory.wav", 128, false, MUSIC_CHANNEL);
+			m_pPlayer1->GetMoveComponent()->SetActive(false);
+			if (m_pPlayer2) m_pPlayer2->GetMoveComponent()->SetActive(false);
+		}
 		m_startNextTimer = true;
 	}
+}
+
+void PrintGameOver()
+{
+	std::cout << "======================" << std::endl;
+	std::cout << "|      GAME OVER     |" << std::endl;
+	std::cout << "======================" << std::endl;
+}
+
+void PrintYouWin()
+{
+	std::cout << "======================" << std::endl;
+	std::cout << "|      YOU WIN!      |" << std::endl;
+	std::cout << "======================" << std::endl;
 }
 
 void LevelLoader::OnNotify(dae::Event event)
@@ -120,7 +138,7 @@ void LevelLoader::OnNotify(dae::Event event)
 				{
 					enemy->Destroy();
 				}
-				std::cout << "Game Over!\n";
+				PrintGameOver();
 			}
 		}
 		catch (const std::exception& e)
@@ -134,6 +152,10 @@ void LevelLoader::OnNotify(dae::Event event)
 void LevelLoader::LoadLevel(const std::string& levelFile)
 {
 	GetLevelInfo(levelFile);
+
+	auto& inputManager = dae::InputManager::GetInstance();
+
+	inputManager.BindKeyboardCommand(SDLK_F1, dae::InputManager::ButtonState::Down, std::make_unique<LoadNextLevelCommand>(GetOwner()));
 
 	CreateLivesDisplay(LEVEL_WIDTH * GRID_SIZE, 4 * GRID_SIZE);
 	if (m_coop)
@@ -154,8 +176,16 @@ void LevelLoader::LoadLevel(const std::string& levelFile)
 
 void LevelLoader::LoadNextLevel()
 {
-	int playerCount{ m_coop ? 2 : 1 };
 	++m_levelNumber;
+	if (m_levelNumber > LEVEL_COUNT)
+	{
+		PrintYouWin();
+		ClearLevel();
+		m_pPlayer1->GetOwner()->SetRenderLayer(-1);
+		if (m_pPlayer2) m_pPlayer2->GetOwner()->SetRenderLayer(-1);
+		return;
+	}
+	int playerCount{ m_coop ? 2 : 1 };
 	std::string nextFileName{m_levelFolderPath + "/Level" + std::to_string(m_levelNumber) + "_" + std::to_string(playerCount) + ".txt"};
 	ClearLevel();
 	SpawnLevelObjects(nextFileName);
@@ -265,11 +295,9 @@ void LevelLoader::SpawnFygar(int x, int y)
 
 void LevelLoader::SpawnPlayer1(int x, int y)
 {
-	//dae::ServiceLocator::GetSoundSystem().PlaySound("Sounds/walkmusic.wav", 128, true, 0);
 	if (m_pPlayer1)
 	{
-		m_pPlayer1->GetOwner()->GetTransform()->SetLocalPosition(static_cast<float>(x * GRID_SIZE), static_cast<float>(y * GRID_SIZE));
-		m_pPlayer1->UpdateRespawn();
+		m_pPlayer1->Reset();
 		return;
 	}
 	auto player1 = std::make_shared<dae::GameObject>();
@@ -304,28 +332,36 @@ void LevelLoader::SpawnPlayer1(int x, int y)
 	inputManager.BindKeyboardCommand(SDLK_a, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player1.get(), glm::vec3(-1.f, 0.f, 0.f), 100.f));
 	inputManager.BindKeyboardCommand(SDLK_d, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player1.get(), glm::vec3(1.f, 0.f, 0.f), 100.f));
 	inputManager.BindKeyboardCommand(SDLK_SPACE, dae::InputManager::ButtonState::Down, std::make_unique<AttackCommand>(player1.get()));
+
+	if (!m_coop)
+	{
+		inputManager.BindGamepadCommand(dae::Gamepad::Button::DPadDown, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player1.get(), glm::vec3(0.f, 1.f, 0.f)));
+		inputManager.BindGamepadCommand(dae::Gamepad::Button::DPadUp, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player1.get(), glm::vec3(0.f, -1.f, 0.f)));
+		inputManager.BindGamepadCommand(dae::Gamepad::Button::DPadLeft, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player1.get(), glm::vec3(-1.f, 0.f, 0.f)));
+		inputManager.BindGamepadCommand(dae::Gamepad::Button::DPadRight, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player1.get(), glm::vec3(1.f, 0.f, 0.f)));
+		inputManager.BindGamepadCommand(dae::Gamepad::Button::A, dae::InputManager::ButtonState::Down, std::make_unique<AttackCommand>(player1.get()));
+	}
 }
 
 void LevelLoader::SpawnPlayer2(int x, int y)
 {
 	if (m_pPlayer2)
 	{
-		m_pPlayer2->GetOwner()->GetTransform()->SetLocalPosition(static_cast<float>(x * GRID_SIZE), static_cast<float>(y * GRID_SIZE));
-		m_pPlayer2->UpdateRespawn();
+		m_pPlayer2->Reset();
 		return;
 	}
 	auto player2 = std::make_shared<dae::GameObject>();
 	player2->SetRenderLayer(3);
 	player2->GetTransform()->SetLocalPosition(static_cast<float>(x * GRID_SIZE), static_cast<float>(y * GRID_SIZE), 0.f);
 	player2->AddComponent(std::make_unique<dae::SpriteRenderComponent>(player2.get(), "DigDug1/Walking.png", 1, 2, static_cast<float>(SPRITE_SCALE)));
-	player2->AddComponent(std::make_unique<dae::ColliderComponent>(player2.get(), dae::make_sdbm_hash("Player2")));
+	player2->AddComponent(std::make_unique<dae::ColliderComponent>(player2.get(), dae::make_sdbm_hash("Player")));
 	player2->GetComponent<dae::ColliderComponent>()->ResizeColliderRect(GRID_SIZE - 14, GRID_SIZE - 14);
 	player2->GetComponent<dae::ColliderComponent>()->OffsetColliderRect(7, 7);
 	player2->AddComponent(std::make_unique<MoveComponent>(player2.get(), m_gridCells, true, true));
 	player2->AddComponent(std::make_unique<HealthComponent>(player2.get(), 3));
 	player2->GetComponent<HealthComponent>()->RegisterObserver(this);
 	player2->AddComponent(std::make_unique<PlayerComponent>(player2.get(), 1));
-	m_pPlayer1 = player2->GetComponent<PlayerComponent>();
+	m_pPlayer2 = player2->GetComponent<PlayerComponent>();
 
 	auto* livesDisplay = m_pUIObjects[P2_HEALTH_DISPLAY_INDEX]->GetComponent<LivesDisplayComponent>();
 	player2->GetComponent<HealthComponent>()->RegisterObserver(livesDisplay);
@@ -345,7 +381,7 @@ void LevelLoader::SpawnPlayer2(int x, int y)
 	inputManager.BindGamepadCommand(dae::Gamepad::Button::DPadUp, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player2.get(), glm::vec3(0.f, -1.f, 0.f)));
 	inputManager.BindGamepadCommand(dae::Gamepad::Button::DPadLeft, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player2.get(), glm::vec3(-1.f, 0.f, 0.f)));
 	inputManager.BindGamepadCommand(dae::Gamepad::Button::DPadRight, dae::InputManager::ButtonState::Pressed, std::make_unique<MoveCharacterCommand>(player2.get(), glm::vec3(1.f, 0.f, 0.f)));
-	inputManager.BindGamepadCommand(dae::Gamepad::Button::X, dae::InputManager::ButtonState::Down, std::make_unique<DieCommand>(player2.get()));
+	inputManager.BindGamepadCommand(dae::Gamepad::Button::A, dae::InputManager::ButtonState::Down, std::make_unique<AttackCommand>(player2.get()));
 }
 
 void LevelLoader::SpawnRock(int x, int y)

@@ -45,7 +45,10 @@ LivesDisplayComponent::LivesDisplayComponent(dae::GameObject* owner, int startin
 	: dae::BaseComponent(owner)
 {
 	const auto& children = GetOwner()->GetChildren();
-	assert(children.size() < startingLives + 1 && "Not enough subObjects to work with");
+	if (static_cast<int>(children.size()) < startingLives)
+	{
+		assert(false && "Not enough subObjects to work with");
+	}
 	for (const auto& child : children)
 	{
 		m_pLifeIcons.emplace_back(child->GetComponent<dae::RenderComponent>());
@@ -72,7 +75,7 @@ void LivesDisplayComponent::OnNotify(dae::Event event)
 			}
 			else
 			{
-				dae::ServiceLocator::GetSoundSystem().PlaySound("Sounds/GameOver.wav", 128, false, -1);
+				dae::ServiceLocator::GetSoundSystem().PlaySound("Sounds/GameOver.wav", 128, false, MUSIC_CHANNEL);
 			}
 		}
 		catch (const std::exception& e)
