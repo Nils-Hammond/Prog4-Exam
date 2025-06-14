@@ -171,7 +171,6 @@
     <ClCompile Include="GridCell.cpp" />
     <ClCompile Include="LevelLoader.cpp" />
     <ClCompile Include="LivesAndPoints.cpp" />
-    <ClCompile Include="Load.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MainMenu.cpp" />
     <ClCompile Include="MoveCharacterCommand.cpp" />
@@ -183,7 +182,6 @@
     <ClCompile Include="PumpComponent.cpp" />
     <ClCompile Include="RotateAround.cpp" />
     <ClCompile Include="SelfDestruct.cpp" />
-    <ClCompile Include="Tunnel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EnemyComponent.h" />
@@ -205,7 +203,6 @@
     <ClInclude Include="PumpComponent.h" />
     <ClInclude Include="RotateAround.h" />
     <ClInclude Include="SelfDestruct.h" />
-    <ClInclude Include="Tunnel.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
