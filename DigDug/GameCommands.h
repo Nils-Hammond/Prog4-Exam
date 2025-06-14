@@ -45,3 +45,33 @@ public:
 	AttackCommand(dae::GameObject* actor);
 	void Execute() override;
 };
+
+class MenuNavigateCommand : public GameActorCommand
+{
+public:
+	MenuNavigateCommand(dae::GameObject* menuActor, int yDirection);
+	void Execute() override;
+private:
+	int m_yDirection;
+};
+
+class MenuSelectCommand : public GameActorCommand
+{
+public:
+	MenuSelectCommand(dae::GameObject* menuActor);
+	void Execute() override;
+};
+
+class MuteAudioCommand : public dae::Command
+{
+public:
+	MuteAudioCommand();
+	void Execute() override;
+};
+
+class LoadNextLevelCommand : public GameActorCommand
+{
+public:
+	LoadNextLevelCommand(dae::GameObject* levelLoaderActor);
+	void Execute() override;
+};

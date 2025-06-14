@@ -10,12 +10,14 @@ dae::ColliderComponent::ColliderComponent(dae::GameObject* owner, const unsigned
 	: BaseComponent(owner)
 	, m_tag(tag)
 	, m_colliderRect{ 0, 0, 0, 0 }
-	, m_subject()
+	, m_pSubject(std::make_unique<Subject>())
 	, m_xOffset(0)
 	, m_yOffset(0)
-	, m_isActive(true)
+	, m_isActive(false)
 {
 	ServiceLocator::GetCollisionSystem().RegisterCollider(this);
+	m_colliderRect.x = static_cast<int>(GetOwner()->GetTransform()->GetWorldPosition().x) + m_xOffset;
+	m_colliderRect.y = static_cast<int>(GetOwner()->GetTransform()->GetWorldPosition().y) + m_yOffset;
 }
 
 dae::ColliderComponent::~ColliderComponent()
@@ -57,6 +59,7 @@ void dae::ColliderComponent::ResizeColliderRect(int width, int height)
 {
 	m_colliderRect.w = width;
 	m_colliderRect.h = height;
+	SetActive(true);
 }
 
 bool dae::ColliderComponent::IsOverlapping(const ColliderComponent& other) const
@@ -66,15 +69,15 @@ bool dae::ColliderComponent::IsOverlapping(const ColliderComponent& other) const
 
 void dae::ColliderComponent::OnCollision(const ColliderComponent& other)
 {
-	m_subject.Notify(Event{ make_sdbm_hash("OnCollision"), std::any{&other} });
+	m_pSubject->Notify(Event{ make_sdbm_hash("OnCollision"), std::any{&other} });
 }
 
 void dae::ColliderComponent::AddObserver(Observer* observer)
 {
-	m_subject.AddObserver(observer);
+	m_pSubject->AddObserver(observer);
 }
 
 void dae::ColliderComponent::RemoveObserver(Observer* observer)
 {
-	m_subject.RemoveObserver(observer);
+	m_pSubject->RemoveObserver(observer);
 }

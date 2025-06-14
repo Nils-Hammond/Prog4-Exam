@@ -12,7 +12,7 @@ class GridCell;
 class MoveComponent : public dae::BaseComponent
 {
 public:
-	MoveComponent(dae::GameObject* owner, const std::array<GridCell*, LEVEL_WIDTH * LEVEL_HEIGHT>& grid, bool canDig = false);
+	MoveComponent(dae::GameObject* owner, const std::array<GridCell*, LEVEL_WIDTH * LEVEL_HEIGHT>& grid, bool rotate = false, bool canDig = false);
 	~MoveComponent();
 	MoveComponent(const MoveComponent& other) = delete;
 	MoveComponent(MoveComponent&& other) = delete;
@@ -29,12 +29,14 @@ public:
 	void SetActive(bool isActive) { m_isActive = isActive; }
 private:
 	bool CanMoveTo(const glm::vec2& newPos);
+	bool CheckRockCollision(const glm::vec2& nextPos);
 	glm::vec3 m_direction;
 	glm::vec3 m_oldDirection;
 	bool m_isFacingRight;
 	bool m_isMoving;
 	bool m_isActive;
 	bool m_canDig;
+	bool m_canRotate;
 	bool m_hitWall;
 	std::array<GridCell*, LEVEL_WIDTH * LEVEL_HEIGHT> m_grid;
 	dae::RenderComponent* m_renderComponent;

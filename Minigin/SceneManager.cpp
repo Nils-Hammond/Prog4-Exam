@@ -31,3 +31,15 @@ dae::Scene& dae::SceneManager::CreateScene(const std::string& name)
 	m_scenes.push_back(scene);
 	return *scene;
 }
+
+dae::Scene& dae::SceneManager::GetScene(const std::string& name)
+{
+	for (const auto& scene : m_scenes)
+	{
+		if (scene->GetName() == name)
+		{
+			return *scene; // Should just do more of that sdbm hash thing
+		}
+	}
+	return *m_scenes.front();
+}

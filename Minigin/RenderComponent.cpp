@@ -6,14 +6,9 @@
 #include "ResourceManager.h"
 
 dae::RenderComponent::RenderComponent(GameObject* owner, const std::string& filename, const float scaleX, const float scaleY)
-	: BaseComponent(owner), m_texture(nullptr), m_scaleX(scaleX), m_scaleY(scaleY), m_angle(0.0)
+	: BaseComponent(owner), m_texture(nullptr), m_scaleX(scaleX), m_scaleY(scaleY), m_angle(0.0), m_offsetX(0), m_offsetY(0)
 {
 	SetTexture(filename);
-}
-
-dae::RenderComponent::RenderComponent(GameObject* owner)
-	: BaseComponent(owner), m_texture(nullptr), m_scaleX(1.f), m_scaleY(1.f), m_angle(0.0)
-{
 }
 
 dae::RenderComponent::RenderComponent(GameObject* owner, const std::string& filename, const float scale)
@@ -34,7 +29,7 @@ void dae::RenderComponent::Render() const
 		if (transform != nullptr)
 		{
 			const auto& pos = transform->GetWorldPosition();
-			Renderer::GetInstance().RenderTextureEx(*m_texture, pos.x, pos.y, m_scaleX, m_scaleY, m_angle);
+			Renderer::GetInstance().RenderTextureEx(*m_texture, pos.x + m_offsetX, pos.y + m_offsetY, m_scaleX, m_scaleY, m_angle);
 		}
 	}
 }
@@ -70,4 +65,10 @@ glm::vec2 dae::RenderComponent::GetScale() const
 void dae::RenderComponent::SetAngle(double angle)
 {
 	m_angle = angle;
+}
+
+void dae::RenderComponent::SetOffset(int x, int y)
+{
+	m_offsetX = x;
+	m_offsetY = y;
 }

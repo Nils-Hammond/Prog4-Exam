@@ -19,9 +19,11 @@ dae::SpriteRenderComponent::SpriteRenderComponent(dae::GameObject* owner, const 
 	, m_isLooping(true)
 {
 	if (m_texture)
-		SDL_QueryTexture(m_texture->GetSDLTexture(), nullptr, nullptr, &m_frameWidth, &m_frameHeight);
-	m_frameWidth /= m_columns;
-	m_frameHeight /= m_rows;
+	{
+		glm::ivec2 textureSize = m_texture->GetSize();
+		m_frameWidth = textureSize.x / m_columns;
+		m_frameHeight = textureSize.y / m_rows;
+	}
 }
 
 dae::SpriteRenderComponent::~SpriteRenderComponent() = default;
@@ -63,7 +65,8 @@ void dae::SpriteRenderComponent::Render() const
 			sourceRect.w = m_frameWidth;
 			sourceRect.h = m_frameHeight;
 			glm::vec2 scale = GetScale();
-			Renderer::GetInstance().RenderSprite(*m_texture, pos.x, pos.y, sourceRect, scale.x, scale.y, GetAngle());
+			glm::ivec2 offset = GetOffset();
+			Renderer::GetInstance().RenderSprite(*m_texture, pos.x + offset.x, pos.y + offset.y, sourceRect, scale.x, scale.y, GetAngle());
 		}
 	}
 }
@@ -115,9 +118,14 @@ void dae::SpriteRenderComponent::SetSpriteGrid(unsigned int rows, unsigned int c
 	m_columns = columns;
 	if (m_texture)
 	{
-		SDL_QueryTexture(m_texture->GetSDLTexture(), nullptr, nullptr, &m_frameWidth, &m_frameHeight);
-		m_frameWidth /= m_columns;
-		m_frameHeight /= m_rows;
+		glm::ivec2 textureSize = m_texture->GetSize();
+		m_frameWidth = textureSize.x / m_columns;
+		m_frameHeight = textureSize.y / m_rows;
 	}
 	Reset();
+}
+
+void dae::SpriteRenderComponent::SetLooping(bool isLooping)
+{
+	m_isLooping = isLooping;
 }

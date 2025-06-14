@@ -27,11 +27,18 @@ public:
 	MoveComponent* GetMoveComponent() const;
 	int GetPlayerNumber() const { return m_playerNumber; }
 	void Attack();
+	bool IsAttacking() const { return m_isAttacking; }
+	bool IsDead() const;
+	void Reset();
+	void UpdateRespawn();
 private:
 	void SetState(std::unique_ptr<PlayerStates::PlayerState> newState);
 	std::unique_ptr<PlayerStates::PlayerState> m_pState;
 	MoveComponent* m_pMoveComponent;
 	dae::SpriteRenderComponent* m_pSpriteRenderComponent;
 	int m_playerNumber;
+	bool m_isAttacking;
+	bool m_isDead;
+	glm::vec3 m_initialPosition;
 };
 

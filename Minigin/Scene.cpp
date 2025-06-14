@@ -26,7 +26,8 @@ Scene::~Scene() = default;
 
 void Scene::Add(std::shared_ptr<GameObject> object)
 {
-	m_objects.emplace_back(std::move(object));
+	assert(object && "Adding Nullptr in m_objects!");
+	if (object) m_objects.emplace_back(std::move(object));
 }
 
 void Scene::Remove(std::shared_ptr<GameObject> object)
@@ -41,9 +42,14 @@ void Scene::RemoveAll()
 
 void Scene::Update()
 {
-	for(auto& object : m_objects)
+	int iterations{};
+	//for(auto& object : m_objects)
+	size_t initialSize = m_objects.size();
+	for (size_t idx{}; idx < initialSize; ++idx)
 	{
-		object->Update();
+		++iterations;
+		//assert(object && "Nullptr in m_objects!");
+		m_objects[idx]->Update();
 	}
 	CleanupObjects();
 }

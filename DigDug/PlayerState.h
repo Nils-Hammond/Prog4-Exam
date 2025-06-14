@@ -2,7 +2,13 @@
 #include <memory>
 //#include "PumpComponent.h"
 
+namespace dae
+{
+	class ColliderComponent;
+}
+
 class PlayerComponent;
+class EnemyComponent;
 class PumpComponent;
 
 namespace PlayerStates
@@ -51,6 +57,11 @@ namespace PlayerStates
 		void Enter(PlayerComponent* player) override;
 	private:
 		PumpComponent* m_pumpComponent{};
+		bool m_pumpConnected{ false };
+		const dae::ColliderComponent* m_pEnemyCollider{ nullptr };
+		float m_attackTimer{};
+		const float ATTACK_COOLDOWN{ 0.55f };
+		EnemyComponent* m_pEnemy;
 	};
 
 	class DyingState : public PlayerState
@@ -59,6 +70,10 @@ namespace PlayerStates
 		std::unique_ptr<PlayerState> Update(PlayerComponent* player) override;
 		void Exit(PlayerComponent* player) override;
 		void Enter(PlayerComponent* player) override;
+	private:
+		float m_deathTimer{};
+		const float DEATH_DURATION{ 1.0f };
+		bool m_isFullyDead{};
 	};
 
 	class CrushedState : public PlayerState

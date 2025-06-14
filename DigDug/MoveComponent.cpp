@@ -6,14 +6,15 @@
 #include "GameConstants.h"
 #include "ColliderComponent.h"
 #include "Renderer.h"
+#include "ServiceLocator.h"
 #include <algorithm>
 
 bool IsOutOfBounds(const glm::vec3& pos);
 
-MoveComponent::MoveComponent(dae::GameObject* owner, const std::array<GridCell*, LEVEL_WIDTH* LEVEL_HEIGHT>& grid, bool canDig)
+MoveComponent::MoveComponent(dae::GameObject* owner, const std::array<GridCell*, LEVEL_WIDTH* LEVEL_HEIGHT>& grid, bool canRotate, bool canDig)
 	: dae::BaseComponent(owner), m_direction(), m_oldDirection(),
 	m_renderComponent(nullptr), m_collider(nullptr),
-	m_isFacingRight(true), m_isMoving(false), m_isActive(true), m_canDig(canDig), m_grid(grid), m_hitWall(false)
+	m_isFacingRight(true), m_isMoving(false), m_isActive(true), m_canDig(canDig), m_grid(grid), m_hitWall(false), m_canRotate(canRotate)
 {
 	m_renderComponent = GetOwner()->GetComponent<dae::RenderComponent>();
 	if (!m_renderComponent)
@@ -52,12 +53,15 @@ void MoveComponent::Update()
 		m_isFacingRight = false;
 		m_renderComponent->SetScale(scale.x > 0 ? -scale.x : scale.x, scale.y);
 	}
-	if (m_direction.y > 0.f)
-		m_renderComponent->SetAngle(scale.x > 0 ? 90.f : -90.f);
-	else if (m_direction.y < 0.f)
-		m_renderComponent->SetAngle(scale.x > 0 ? -90.f : 90.f);
-	else
-		m_renderComponent->SetAngle(0.f);
+	if (m_canRotate)
+	{
+		if (m_direction.y > 0.f)
+			m_renderComponent->SetAngle(scale.x > 0 ? 90.f : -90.f);
+		else if (m_direction.y < 0.f)
+			m_renderComponent->SetAngle(scale.x > 0 ? -90.f : 90.f);
+		else
+			m_renderComponent->SetAngle(0.f);
+	}
 
 	const glm::vec3& oldPosition = GetOwner()->GetTransform()->GetLocalPosition();
 	const glm::vec3& newPosition = oldPosition + m_direction * dae::Time::GetInstance().GetDeltaTime();
@@ -65,7 +69,7 @@ void MoveComponent::Update()
 	m_hitWall = !canMove;
 	//std::string debugMessage = canMove ? "Moving to new position\n" : "Cannot move to new position\n";
 	//std::cout << debugMessage;
-	if ((m_canDig || canMove) && !IsOutOfBounds(newPosition))
+	if (((m_canDig && !CheckRockCollision(newPosition)) || canMove) && !IsOutOfBounds(newPosition))
 	{
 		GetOwner()->GetTransform()->SetLocalPosition(newPosition);
 	}
@@ -97,6 +101,8 @@ bool MoveComponent::IsMoving() const
 
 bool MoveComponent::CanMoveTo(const glm::vec2& nextPos)
 {
+	if (IsOutOfBounds(glm::vec3(nextPos.x, nextPos.y, 0)))
+		return false;
 	SDL_Rect colliderRect = m_collider->GetColliderRect();
 	const int xOffset = static_cast<int>(colliderRect.x - m_collider->GetOwner()->GetTransform()->GetWorldPosition().x);
 	const int yOffset = static_cast<int>(colliderRect.y - m_collider->GetOwner()->GetTransform()->GetWorldPosition().y);
@@ -160,6 +166,26 @@ bool MoveComponent::CanMoveTo(const glm::vec2& nextPos)
 		}
 	}
 	return true;
+}
+
+bool MoveComponent::CheckRockCollision(const glm::vec2& nextPos)
+{
+	SDL_Rect colliderRect = m_collider->GetColliderRect();
+	const int xOffset = static_cast<int>(colliderRect.x - m_collider->GetOwner()->GetTransform()->GetWorldPosition().x);
+	const int yOffset = static_cast<int>(colliderRect.y - m_collider->GetOwner()->GetTransform()->GetWorldPosition().y);
+
+	colliderRect.x = static_cast<int>(nextPos.x) + xOffset;
+	colliderRect.y = static_cast<int>(nextPos.y) + yOffset;
+
+	std::vector<dae::ColliderComponent*> collisions = dae::ServiceLocator::GetCollisionSystem().GetCollisions(colliderRect);
+	for (const auto& collider : collisions)
+	{
+		if (collider->GetTag() == dae::make_sdbm_hash("Rock"))
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 void MoveComponent::Render() const

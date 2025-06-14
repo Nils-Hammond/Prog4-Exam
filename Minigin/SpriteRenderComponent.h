@@ -25,6 +25,7 @@ namespace dae
 		bool NextFrame();
 		bool PreviousFrame();
 		void SetSpriteGrid(unsigned int rows, unsigned int columns);
+		void SetLooping(bool isLooping);
 	private:
 		const float DEFAULT_FRAME_DELAY{ 0.2f };
 		unsigned int m_rows;

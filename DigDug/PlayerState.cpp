@@ -6,6 +6,9 @@
 #include "PumpComponent.h"
 #include "GameObject.h"
 #include "DaeTime.h"
+#include "PookaComponent.h"
+#include "ColliderComponent.h"
+#include "GameCommands.h"
 
 using namespace PlayerStates;
 
@@ -56,18 +59,53 @@ void MovingState::Enter(PlayerComponent* player)
 	dae::ServiceLocator::GetSoundSystem().ResumeChannel(0);
 }
 
-std::unique_ptr<PlayerStates::PlayerState> AttackingState::Update(PlayerComponent* )
+std::unique_ptr<PlayerStates::PlayerState> AttackingState::Update(PlayerComponent* player)
 {
-	if (m_pumpComponent == nullptr)
+	m_attackTimer += dae::Time::GetInstance().GetDeltaTime();
+	if (m_attackTimer >= ATTACK_COOLDOWN / 2 && m_pumpConnected)
+	{
+		player->GetSpriteRenderComponent()->Reset(); // Lil pumping animation
+	}
+	// Going back to Idle
+	if (m_pumpComponent == nullptr || !m_pumpComponent->IsActive())
+	{
 		return std::make_unique<PlayerStates::IdleState>();
-	if (!m_pumpComponent->IsActive())
+	}
+	else if (m_pumpConnected && m_pEnemy && m_pEnemy->IsDead())
+	{
+		m_pumpComponent->Deactivate();
 		return std::make_unique<PlayerStates::IdleState>();
+	}
+
+	// Attacking an enemy
+	if (!m_pumpConnected && (m_pEnemyCollider = m_pumpComponent->GetHitEnemy()) != nullptr)
+	{
+		player->GetMoveComponent()->SetActive(true);
+		m_pumpConnected = true;
+		m_attackTimer = 0.f;
+		dae::ServiceLocator::GetSoundSystem().PlaySound("Sounds/PumpToEnemy.wav", 128, false, -1);
+		player->GetSpriteRenderComponent()->SetTexture("DigDug" + std::to_string(player->GetPlayerNumber()) + "/Pumping.png");
+	}
+	else if (m_attackTimer >= ATTACK_COOLDOWN && m_pumpConnected && m_pEnemyCollider && player->IsAttacking())
+	{
+		m_pEnemy = m_pEnemyCollider->GetOwner()->GetComponent<EnemyComponent>();
+		if (m_pEnemy) m_pEnemy->Inflate();
+		m_attackTimer = 0.f;
+		player->GetSpriteRenderComponent()->NextFrame();
+		dae::ServiceLocator::GetSoundSystem().PlaySound("Sounds/PumpToEnemy.wav", 128, false, -1);
+	}
+	if (player->GetMoveComponent()->IsMoving())
+	{
+		m_pumpComponent->Deactivate();
+		return std::make_unique<PlayerStates::MovingState>();
+	}
     return nullptr;
 }
 
 void AttackingState::Exit(PlayerComponent* player)
 {
 	player->GetMoveComponent()->SetActive(true);
+	player->GetSpriteRenderComponent()->Play();
 	dae::ServiceLocator::GetSoundSystem().StopChannel(1);
 }
 
@@ -85,21 +123,45 @@ void AttackingState::Enter(PlayerComponent* player)
 	{
 		m_pumpComponent->Activate();
 		player->GetMoveComponent()->SetActive(false);
-		dae::ServiceLocator::GetSoundSystem().PlaySound("Sounds/PumpShoot.wav", 128, false, 1);
+		dae::ServiceLocator::GetSoundSystem().PlaySound("Sounds/PumpShoot.wav", 128, true, 1);
 	}
 }
 
-std::unique_ptr<PlayerStates::PlayerState> DyingState::Update(PlayerComponent* )
+std::unique_ptr<PlayerStates::PlayerState> DyingState::Update(PlayerComponent* player)
 {
+	m_deathTimer += dae::Time::GetInstance().GetDeltaTime();
+	if (!m_isFullyDead && m_deathTimer >= DEATH_DURATION)
+	{
+		m_isFullyDead = true;
+		player->GetOwner()->SetRenderLayer(-1);
+	}
     return nullptr;
 }
 
-void DyingState::Exit(PlayerComponent* )
+void DyingState::Exit(PlayerComponent* player)
 {
+	const std::string folder = "DigDug";
+	const std::string filename = "/Walking.png";
+	auto* spriteRender = player->GetSpriteRenderComponent();
+	spriteRender->SetTexture(folder + std::to_string(player->GetPlayerNumber()) + filename);
+	spriteRender->Reset();
+	spriteRender->SetSpriteGrid(1, 2);
+	spriteRender->SetLooping(true);
+	player->GetMoveComponent()->SetActive(true);
 }
 
-void DyingState::Enter(PlayerComponent* )
+void DyingState::Enter(PlayerComponent* player)
 {
+	const std::string folder = "DigDug";
+	const std::string filename = "/Death.png";
+	auto* spriteRender = player->GetSpriteRenderComponent();
+	spriteRender->SetTexture(folder + std::to_string(player->GetPlayerNumber()) + filename);
+	spriteRender->Reset();
+	spriteRender->SetSpriteGrid(1, 4);
+	spriteRender->SetLooping(false);
+	player->GetMoveComponent()->SetActive(false);
+	auto dieCommand = std::make_unique<DieCommand>(player->GetOwner());
+	dieCommand->Execute();
 }
 
 std::unique_ptr<PlayerStates::PlayerState> CrushedState::Update(PlayerComponent* )
@@ -129,7 +191,6 @@ std::unique_ptr<PlayerStates::PlayerState> DiggingState::Update(PlayerComponent*
 	}
 	else if (shovelTimer >= MAX_SHOVEL_DURATION)
 	{
-		std::cout << "Stopped digging" << std::endl;
 		return std::make_unique<PlayerStates::MovingState>();
 	}
 	else if (player->GetMoveComponent()->IsHittingWall())

@@ -41,3 +41,14 @@ std::vector<dae::ColliderComponent*> dae::SimpleCollisionSystem::GetCollisions(c
 	}
 	return overlaps;
 }
+
+std::vector<dae::ColliderComponent*> dae::SimpleCollisionSystem::GetCollisions(const SDL_Rect& colliderRect) const
+{
+	std::vector<ColliderComponent*> overlaps;
+	for (const auto& other : m_pColliders)
+	{
+		if (SDL_HasIntersection(&colliderRect, &other->GetColliderRect()))
+			overlaps.emplace_back(other);
+	}
+	return overlaps;
+}

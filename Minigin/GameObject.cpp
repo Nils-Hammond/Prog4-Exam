@@ -34,7 +34,7 @@ void dae::GameObject::Update()
 {
 	for (auto& component : _uptrComponents)
 	{
-		component->Update();
+		if (component) component->Update();
 	}
 	CleanupComponents();
 }
@@ -93,7 +93,7 @@ void dae::GameObject::Destroy()
 		SetParent(nullptr);
 }
 
-void dae::GameObject::SetRenderLayer(unsigned int layer)
+void dae::GameObject::SetRenderLayer(int layer)
 {
 	m_renderLayer = (layer >= MAX_RENDER_LAYERS ? MAX_RENDER_LAYERS : layer);
 	for (auto& child : m_pChildren)

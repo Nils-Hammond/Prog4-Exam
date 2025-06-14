@@ -34,6 +34,7 @@ void GridCell::FixedUpdate()
 
 void GridCell::Render() const
 {
+	// Need some helper functions for manual pixel drawing (EngineUtils.h) but not enough time
 	SDL_Renderer* sdlRenderer = dae::Renderer::GetInstance().GetSDLRenderer();
 
 	SDL_SetRenderDrawColor(sdlRenderer, 0, 0, 0, 255);

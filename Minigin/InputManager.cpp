@@ -63,16 +63,42 @@ bool dae::InputManager::ProcessInput()
 		if (m_gamepad->IsButtonPressed(keyPair.first) && keyPair.second == ButtonState::Pressed)
 			command.get()->Execute();
 	}
-
+	
+	// Unbind timing is tricky and I could not figure it out
+	UnbindPending();
 	return true;
 }
 
 void dae::InputManager::BindKeyboardCommand(SDL_Keycode key, ButtonState state, std::unique_ptr<Command> command)
 {
-	m_keyboardCommands.emplace(std::make_pair(key, state), std::move(command));
+	m_keyboardCommands.insert_or_assign(std::make_pair(key, state), std::move(command));
+}
+
+void dae::InputManager::Unbind(SDL_Keycode key)
+{
+	m_keysToUnbind.emplace_back(key);
 }
 
 void dae::InputManager::BindGamepadCommand(Gamepad::Button button, ButtonState state, std::unique_ptr<Command> command)
 {
-	m_gamepadCommands.emplace(std::make_pair(button, state), std::move(command));
+	m_gamepadCommands.insert_or_assign(std::make_pair(button, state), std::move(command));
+}
+
+void dae::InputManager::Unbind(Gamepad::Button button)
+{
+	m_buttonsToUnbind.emplace_back(button);
+}
+
+void dae::InputManager::UnbindPending()
+{
+	for (const auto& key : m_keysToUnbind)
+	{
+		std::erase_if(m_keyboardCommands, [key](const auto& pair) {return pair.first.first == key; });
+	}
+	for (const auto& button : m_buttonsToUnbind)
+	{
+		std::erase_if(m_gamepadCommands, [button](const auto& pair) {return pair.first.first == button; });
+	}
+	m_keysToUnbind.clear();
+	m_buttonsToUnbind.clear();
 }

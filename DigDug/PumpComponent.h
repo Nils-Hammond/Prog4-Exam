@@ -20,9 +20,10 @@ public:
 	void Update() override;
 	void Render() const override;
 	void Activate();
+	void Deactivate();
 	bool IsActive() const;
 	void OnNotify(dae::Event event) override;
-	dae::ColliderComponent* GetHitEnemy() const;
+	const dae::ColliderComponent* GetHitEnemy() const;
 private:
 	void UpdateCollider();
 	bool m_isActive;
@@ -31,7 +32,7 @@ private:
 	float m_maxDuration;
 	glm::vec2 m_direction;
 	dae::ColliderComponent* m_pColliderComponent;
-	dae::ColliderComponent* m_pEnemyCollider;
+	const dae::ColliderComponent* m_pEnemyCollider;
 	PlayerComponent* m_pPlayerComponent;
 };
 

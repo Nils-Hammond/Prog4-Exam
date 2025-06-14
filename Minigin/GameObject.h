@@ -25,7 +25,7 @@ namespace dae
 		std::vector<GameObject*> GetChildren() { return m_pChildren; }
 		void Destroy();
 		bool IsToBeDestroyed() const { return m_toBeDestroyed; }
-		void SetRenderLayer(unsigned int layer);
+		void SetRenderLayer(int layer);
 		int GetRenderLayer() const { return m_renderLayer; }
 
 		// Component management
@@ -110,6 +110,6 @@ namespace dae
 		std::vector<GameObject*> m_pChildren{};
 		GameObject* m_parent{};
 		bool m_toBeDestroyed{ false };
-		unsigned int m_renderLayer{ 0 };
+		int m_renderLayer{ 0 };
 	};
 }

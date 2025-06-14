@@ -43,6 +43,13 @@ namespace PookaStates
 		std::unique_ptr<PookaState> Update(PookaComponent* pooka) override;
 		void Exit(PookaComponent* pooka) override;
 		void Enter(PookaComponent* pooka) override;
+	private:
+		void Inflate(PookaComponent* pooka);
+		void Deflate(PookaComponent* pooka);
+		int m_inflationProgress{};
+		const int MAX_INFLATION_PROGRESS{ 3 };
+		float m_deflationTimer{};
+		const float DEFLATION_COOLDOWN{ 1.f };
 	};
 
 	class CrushedState : public PookaState
@@ -59,6 +66,9 @@ namespace PookaStates
 		std::unique_ptr<PookaState> Update(PookaComponent* pooka) override;
 		void Exit(PookaComponent* pooka) override;
 		void Enter(PookaComponent* pooka) override;
+	private:
+		float m_deathTimer{};
+		const float DEATH_DURATION{ 1.0f };
 	};
 
 	class GhostState : public PookaState

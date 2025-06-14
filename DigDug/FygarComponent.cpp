@@ -1,18 +1,18 @@
-#include "PookaComponent.h"
+#include "FygarComponent.h"
 #include "ColliderComponent.h"
 #include "MoveComponent.h"
-#include "PookaState.h"
+#include "FygarState.h"
 #include "GameObject.h"
 #include "SpriteRenderComponent.h"
 
-PookaComponent::PookaComponent(dae::GameObject* owner, float speed) :
+FygarComponent::FygarComponent(dae::GameObject* owner, float speed) :
 	EnemyComponent(owner, speed)
-	, m_pState(std::make_unique<PookaStates::MovingState>())
+	, m_pState(std::make_unique<FygarStates::MovingState>())
 {
 	m_pState->Enter(this);
 }
 
-void PookaComponent::Update()
+void FygarComponent::Update()
 {
 	auto newState = m_pState->Update(this);
 	if (newState != nullptr)
@@ -22,18 +22,18 @@ void PookaComponent::Update()
 	m_isInflating = false;
 }
 
-void PookaComponent::Kill()
+void FygarComponent::Kill()
 {
 	m_isDead = true;
-	m_pDeathSubject->Notify(dae::Event{ dae::make_sdbm_hash("OnEnemyDeath"), GetOwner()});
+	m_pDeathSubject->Notify(dae::Event{ dae::make_sdbm_hash("OnEnemyDeath"), GetOwner() });
 }
 
-void PookaComponent::Inflate()
+void FygarComponent::Inflate()
 {
 	m_isInflating = true;
 }
 
-void PookaComponent::OnNotify(dae::Event event)
+void FygarComponent::OnNotify(dae::Event event)
 {
 	if (event.id == dae::make_sdbm_hash("OnCollision"))
 	{
@@ -42,9 +42,10 @@ void PookaComponent::OnNotify(dae::Event event)
 			auto* collider = std::any_cast<const dae::ColliderComponent*>(event.data);
 			if (collider && collider->GetTag() == dae::make_sdbm_hash("Pump"))
 			{
-				if (dynamic_cast<PookaStates::InflatedState*>(m_pState.get()) == nullptr)
+				std::cout << "Pooka collided with a pump" << std::endl;
+				if (dynamic_cast<FygarStates::InflatedState*>(m_pState.get()) == nullptr)
 				{
-					SetState(std::make_unique<PookaStates::InflatedState>());
+					SetState(std::make_unique<FygarStates::InflatedState>());
 				}
 				else
 				{
@@ -60,17 +61,17 @@ void PookaComponent::OnNotify(dae::Event event)
 	}
 }
 
-void PookaComponent::Reset()
+void FygarComponent::Reset()
 {
 	if (!m_isDead)
 	{
 		GetOwner()->GetTransform()->SetLocalPosition(m_initialPosition);
 		GetOwner()->SetRenderLayer(4);
-		SetState(std::make_unique<PookaStates::MovingState>());
+		SetState(std::make_unique<FygarStates::MovingState>());
 	}
 }
 
-void PookaComponent::SetState(std::unique_ptr<PookaStates::PookaState> newState)
+void FygarComponent::SetState(std::unique_ptr<FygarStates::FygarState> newState)
 {
 	m_pState->Exit(this);
 	m_pState = std::move(newState);

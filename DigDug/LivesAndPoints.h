@@ -2,8 +2,13 @@
 #include "BaseComponent.h"
 #include "SubjectObserver.h"
 
+namespace dae
+{
+	class TextRenderComponent;
+	class RenderComponent;
+}
 
-class HealthComponent final : public dae::BaseComponent, public dae::Subject
+class HealthComponent final : public dae::BaseComponent
 {
 public:
 	HealthComponent(dae::GameObject* owner, int startingHealth);
@@ -11,12 +16,14 @@ public:
 	void Update() override {};
 	int TakeDamage(int damage);
 	int GetHealth() const;
+	void RegisterObserver(dae::Observer* observer);
+	void UnregisterObserver(dae::Observer* observer);
 private:
 	int m_CurrentHealth{};
 	int m_MaxHealth{};
+	std::unique_ptr<dae::Subject> m_pSubject{};
 };
 
-namespace dae { class TextRenderComponent; }
 class LivesDisplayComponent final : public dae::BaseComponent, public dae::Observer
 {
 public:
@@ -25,11 +32,11 @@ public:
 	void Update() override {};
 	void OnNotify(dae::Event event) override;
 private:
-	dae::TextRenderComponent* m_pTextRenderComponent{};
-	int m_Lives{};
+	std::vector<dae::RenderComponent*> m_pLifeIcons;
+	//int m_Lives{};
 };
 
-class ScoreDisplayComponent final : public dae::BaseComponent, public dae::Observer, public dae::Subject
+class ScoreDisplayComponent final : public dae::BaseComponent, public dae::Observer
 {
 public:
 	ScoreDisplayComponent(dae::GameObject* owner);
@@ -38,5 +45,5 @@ public:
 	void OnNotify(dae::Event event) override;
 private:
 	dae::TextRenderComponent* m_pTextRenderComponent{};
-	int m_Score{};
+	int m_score{};
 };

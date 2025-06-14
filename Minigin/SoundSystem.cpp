@@ -17,7 +17,7 @@ public:
 	void StopChannel(const int channel);
 	void PauseChannel(const int channel);
 	void ResumeChannel(const int channel);
-	void StopAllSounds();
+	void ToggleMute();
 private:
 	struct AudioData
 	{
@@ -37,12 +37,14 @@ private:
 	std::condition_variable m_cv;
 	std::mutex m_mutex;
 	bool m_isRunning;
+	bool m_isMuted;
 };
 
 dae::SDLSoundSystem::SDLSoundSystemImpl::SDLSoundSystemImpl()
-	: m_isRunning(true)
+	: m_isRunning(true), m_isMuted(false)
 {
-	Mix_OpenAudio(48000, MIX_DEFAULT_FORMAT, 2, 2048);
+	//	Probably only up to 4 sounds at a time
+	Mix_OpenAudio(48000, MIX_DEFAULT_FORMAT, 4, 2048);
 	m_soundThread = std::thread(&SDLSoundSystemImpl::ProcessSounds, this);
 }
 
@@ -64,7 +66,7 @@ dae::SDLSoundSystem::SDLSoundSystemImpl::~SDLSoundSystemImpl()
 void dae::SDLSoundSystem::SDLSoundSystemImpl::PlaySound(const std::string& filename, const int volume, bool loop, const int channel)
 {
 	std::unique_lock<std::mutex> lock(m_mutex);
-	m_soundQueue.emplace(std::make_unique<AudioData>(filename, volume, channel, loop));
+	m_soundQueue.emplace(std::make_unique<AudioData>(filename, m_isMuted ? 0 : volume, channel, loop));
 	m_cv.notify_one();
 }
 
@@ -104,8 +106,15 @@ void dae::SDLSoundSystem::SDLSoundSystemImpl::ResumeChannel(const int channel)
 	}
 }
 
-void dae::SDLSoundSystem::SDLSoundSystemImpl::StopAllSounds()
+void dae::SDLSoundSystem::SDLSoundSystemImpl::ToggleMute()
 {
+	m_isMuted = !m_isMuted;
+	std::string debug = m_isMuted ? "Muting Sound" : "Unumuting Sound";
+	std::cout << debug << std::endl;
+	if (m_isMuted)
+	{
+		StopChannel(-1);
+	}
 }
 
 void dae::SDLSoundSystem::SDLSoundSystemImpl::ProcessSounds()
@@ -156,4 +165,9 @@ void dae::SDLSoundSystem::PauseChannel(const int channel)
 void dae::SDLSoundSystem::ResumeChannel(const int channel)
 {
 	m_pImpl->ResumeChannel(channel);
+}
+
+void dae::SDLSoundSystem::ToggleMute()
+{
+	m_pImpl->ToggleMute();
 }

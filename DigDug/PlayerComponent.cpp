@@ -12,7 +12,11 @@ PlayerComponent::PlayerComponent(dae::GameObject* owner, int playerNumber)
 	, m_pMoveComponent(nullptr)
 	, m_pSpriteRenderComponent(nullptr)
 	, m_playerNumber(playerNumber)
+	, m_isAttacking(false)
+	, m_isDead(false)
+	, m_initialPosition()
 {
+	m_initialPosition = GetOwner()->GetTransform()->GetWorldPosition();
 	GetOwner()->GetComponent<dae::ColliderComponent>()->AddObserver(this);
 	m_pMoveComponent = GetOwner()->GetComponent<MoveComponent>();
 	if (!m_pMoveComponent)
@@ -36,6 +40,7 @@ void PlayerComponent::Update()
 	{
 		SetState(std::move(newState));
 	}
+	m_isAttacking = false;
 }
 
 void PlayerComponent::OnNotify(dae::Event event)
@@ -45,9 +50,13 @@ void PlayerComponent::OnNotify(dae::Event event)
 		try
 		{
 			auto* collider = std::any_cast<const dae::ColliderComponent*>(event.data);
-			if (collider && collider->GetTag() == dae::make_sdbm_hash("Rock"))
+			if (collider && collider->GetTag() == dae::make_sdbm_hash("Enemy"))
 			{
-				std::cout << "Player collided with a rock" << std::endl;
+				if (!m_isDead)
+				{
+					m_isDead = true;
+					SetState(std::make_unique<PlayerStates::DyingState>());
+				}
 			}
 		}
 		catch (const std::exception& e)
@@ -70,10 +79,32 @@ MoveComponent* PlayerComponent::GetMoveComponent() const
 
 void PlayerComponent::Attack()
 {
-	if (dynamic_cast<PlayerStates::AttackingState*>(m_pState.get()) == nullptr)
+	if (!m_isDead && dynamic_cast<PlayerStates::AttackingState*>(m_pState.get()) == nullptr)
 	{
 		SetState(std::make_unique<PlayerStates::AttackingState>());
 	}
+	else if (!m_isDead)
+	{
+		m_isAttacking = true;
+	}
+}
+
+bool PlayerComponent::IsDead() const
+{
+	return m_isDead;
+}
+
+void PlayerComponent::Reset()
+{
+	GetOwner()->GetTransform()->SetLocalPosition(m_initialPosition);
+	GetOwner()->SetRenderLayer(3);
+	SetState(std::make_unique<PlayerStates::IdleState>());
+	m_isDead = false;
+}
+
+void PlayerComponent::UpdateRespawn()
+{
+	m_initialPosition = GetOwner()->GetTransform()->GetWorldPosition();
 }
 
 void PlayerComponent::SetState(std::unique_ptr<PlayerStates::PlayerState> newState)

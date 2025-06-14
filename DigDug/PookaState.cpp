@@ -6,6 +6,7 @@
 #include "MoveComponent.h"
 #include "GameObject.h"
 #include "GameConstants.h"
+#include "ColliderComponent.h"
 
 using namespace PookaStates;
 
@@ -48,7 +49,7 @@ std::unique_ptr<PookaStates::PookaState> MovingState::Update(PookaComponent* poo
 	{
 		m_desiredDirection = GetRandomGridDirection();
 		m_moveCommand = std::make_unique<MoveCharacterCommand>(pooka->GetOwner(), m_desiredDirection, pooka->GetSpeed());
-		m_timeSinceLastDirectionChange -= DIRECTION_CHANGE_INTERVAL;
+		m_timeSinceLastDirectionChange = 0.f;
 	}
 	if (m_moveCommand)
 		m_moveCommand->Execute();
@@ -69,7 +70,10 @@ void MovingState::Enter(PookaComponent* pooka)
 	m_ghostCooldownDuration = dist(m_randomNumGen);
 
 	pooka->GetSpriteRenderComponent()->SetTexture("Pooka/Default.png");
+	pooka->GetSpriteRenderComponent()->SetSpriteGrid(1, 2);
 	pooka->GetSpriteRenderComponent()->Reset();
+	pooka->GetSpriteRenderComponent()->Play();
+	pooka->GetSpriteRenderComponent()->SetOffset(0, 0);
 	m_desiredDirection = GetRandomGridDirection();
 	m_moveCommand = std::make_unique<MoveCharacterCommand>(pooka->GetOwner(), m_desiredDirection, pooka->GetSpeed());
 }
@@ -95,15 +99,33 @@ bool PookaStates::MovingState::BreakBounceLoop(PookaComponent* pooka)
 	return false;
 }
 
-std::unique_ptr<PookaStates::PookaState> InflatedState::Update(PookaComponent* )
+std::unique_ptr<PookaStates::PookaState> InflatedState::Update(PookaComponent* pooka)
 {
+	m_deflationTimer += dae::Time::GetInstance().GetDeltaTime();
+	if (pooka->IsInflating())
+	{
+		Inflate(pooka);
+		m_deflationTimer = 0.f;
+	}
+	else if (m_deflationTimer >= DEFLATION_COOLDOWN)
+	{
+		Deflate(pooka);
+		m_deflationTimer = 0.f;
+	}
+	if (m_inflationProgress < 0)
+	{
+		return std::make_unique<PookaStates::MovingState>();
+	}
+	else if (m_inflationProgress >= MAX_INFLATION_PROGRESS)
+	{
+		return std::make_unique<PookaStates::DyingState>();
+	}
 	return nullptr;
 }
 
 void PookaStates::InflatedState::Exit(PookaComponent* pooka)
 {
-	pooka->GetSpriteRenderComponent()->Play();
-	pooka->GetSpriteRenderComponent()->SetSpriteGrid(1, 2);
+	pooka->GetOwner()->GetComponent<dae::ColliderComponent>()->ChangeTag(dae::make_sdbm_hash("Enemy"));
 }
 
 void PookaStates::InflatedState::Enter(PookaComponent* pooka)
@@ -112,6 +134,20 @@ void PookaStates::InflatedState::Enter(PookaComponent* pooka)
 	spriteRender->SetTexture("Pooka/Pumped.png");
 	spriteRender->SetSpriteGrid(1, 4);
 	spriteRender->Pause();
+	spriteRender->SetOffset(-GRID_SIZE / 2, -GRID_SIZE / 2);
+	pooka->GetOwner()->GetComponent<dae::ColliderComponent>()->ChangeTag(dae::make_sdbm_hash("Balloon"));
+}
+
+void PookaStates::InflatedState::Inflate(PookaComponent* pooka)
+{
+	++m_inflationProgress;
+	pooka->GetSpriteRenderComponent()->NextFrame();
+}
+
+void PookaStates::InflatedState::Deflate(PookaComponent* pooka)
+{
+	--m_inflationProgress;
+	pooka->GetSpriteRenderComponent()->PreviousFrame();
 }
 
 std::unique_ptr<PookaStates::PookaState> CrushedState::Update(PookaComponent* )
@@ -127,13 +163,22 @@ void PookaStates::CrushedState::Enter(PookaComponent* pooka)
 {
 	auto* spriteRender = pooka->GetSpriteRenderComponent();
 	spriteRender->SetTexture("Pooka/CrushedByRock.png");
+	spriteRender->SetSpriteGrid(1, 2);
 	spriteRender->Reset();
 	spriteRender->Pause();
+	pooka->GetSpriteRenderComponent()->SetOffset(0, 0);
 	dae::ServiceLocator::GetSoundSystem().PlaySound("Pooka/RockHit.wav", 128, false, -1);
+	pooka->Kill();
 }
 
-std::unique_ptr<PookaStates::PookaState> DyingState::Update(PookaComponent* )
+std::unique_ptr<PookaStates::PookaState> DyingState::Update(PookaComponent* pooka)
 {
+	m_deathTimer += dae::Time::GetInstance().GetDeltaTime();
+	if (m_deathTimer >= DEATH_DURATION)
+	{
+		pooka->GetOwner()->Destroy();
+		return nullptr;
+	}
 	return nullptr;
 }
 
@@ -141,8 +186,12 @@ void PookaStates::DyingState::Exit(PookaComponent* )
 {
 }
 
-void PookaStates::DyingState::Enter(PookaComponent* )
+void PookaStates::DyingState::Enter(PookaComponent* pooka)
 {
+	pooka->GetOwner()->GetComponent<dae::ColliderComponent>()->SetActive(false);
+	dae::ServiceLocator::GetSoundSystem().PlaySound("Sounds/EnemyDeath.wav", 128, false, -1);
+	m_deathTimer = 0.f;
+	pooka->Kill();
 }
 
 std::unique_ptr<PookaStates::PookaState> GhostState::Update(PookaComponent* pooka)
@@ -151,7 +200,7 @@ std::unique_ptr<PookaStates::PookaState> GhostState::Update(PookaComponent* pook
 	m_ghostingDuration += dae::Time::GetInstance().GetDeltaTime();
 	if (m_ghostingDuration >= MIN_GHOSTING_DURATION && !pooka->GetMoveComponent()->IsHittingWall())
 	{
-		glm::vec3 position = pooka->GetOwner()->GetTransform()->GetLocalPosition();
+		glm::vec3 position = pooka->GetOwner()->GetTransform()->GetWorldPosition();
 		position.x = std::round(position.x / GRID_SIZE) * GRID_SIZE;
 		position.y = std::round(position.y / GRID_SIZE) * GRID_SIZE;
 		pooka->GetOwner()->GetTransform()->SetLocalPosition(position);
@@ -162,7 +211,7 @@ std::unique_ptr<PookaStates::PookaState> GhostState::Update(PookaComponent* pook
 		const glm::vec3& targetPos = m_pTargetPlayer->GetTransform()->GetWorldPosition();
 		const glm::vec3& pookaPos = pooka->GetOwner()->GetTransform()->GetWorldPosition();
 		const glm::vec3& direction = glm::normalize(targetPos - pookaPos);
-		pooka->GetOwner()->GetTransform()->SetLocalPosition(pooka->GetOwner()->GetTransform()->GetLocalPosition() + direction * (pooka->GetSpeed() / 2) * dae::Time::GetInstance().GetDeltaTime());
+		pooka->GetOwner()->GetTransform()->SetLocalPosition(pooka->GetOwner()->GetTransform()->GetLocalPosition() + direction * ENEMY_GHOST_SPEED * dae::Time::GetInstance().GetDeltaTime());
 	}
 	else
 	{
@@ -180,9 +229,11 @@ void PookaStates::GhostState::Enter(PookaComponent* pooka)
 {
 	auto* spriteRender = pooka->GetSpriteRenderComponent();
 	spriteRender->SetTexture("Pooka/Ghost.png");
+	spriteRender->SetSpriteGrid(1, 2);
 	spriteRender->Reset();
 	spriteRender->SetAngle(0.f);
 	spriteRender->SetScale(glm::abs(spriteRender->GetScale()));
+	spriteRender->Play();
 	pooka->GetMoveComponent()->SetActive(false);
 	m_pTargetPlayer = pooka->GetClosestPlayer();
 }
